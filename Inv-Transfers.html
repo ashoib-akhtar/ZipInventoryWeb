@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer | Restaurant Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f1f5f9;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        /* Sidebar hover expansion logic */
+        aside {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 64px;
+            z-index: 50;
+        }
+        aside:hover { width: 260px; }
+
+        .menu-text {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+            display: none;
+        }
+        aside:hover .menu-text { opacity: 1; display: inline; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            height: 48px;
+            padding: 0 20px;
+            color: #94a3b8;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        /* Table Styling */
+        .transfer-table th {
+            font-size: 11px;
+            text-transform: capitalize;
+            color: #475569;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            text-align: left;
+            white-space: nowrap;
+            background: #f8fafc;
+        }
+        .transfer-table td {
+            font-size: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        .data-row:hover { background-color: #f8fafc; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Segmented Toggle Control */
+        .toggle-container {
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 999px;
+            display: flex;
+            width: fit-content;
+        }
+        .toggle-btn {
+            padding: 6px 40px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .toggle-btn.active {
+            background: #94a3b8;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .toggle-btn.inactive {
+            color: #475569;
+            background: transparent;
+        }
+
+        /* Filter Popover Styling */
+        #filterPopover {
+            transform-origin: top;
+            transition: all 0.2s ease-out;
+        }
+        #filterPopover.hidden {
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+            pointer-events: none;
+            display: block !important;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #3b82f6;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            background: white;
+            transition: all 0.2s;
+        }
+        .custom-checkbox:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Detail View Specifics */
+        .view-container { display: none; flex-direction: column; height: 100%; }
+        .active-view { display: flex; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- Hover Sidebar -->
+    <aside class="h-screen bg-[#0f172a] shadow-xl flex flex-col flex-shrink-0">
+        <div class="h-14 flex items-center px-4 bg-[#1e293b] border-b border-slate-700">
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center flex-shrink-0">
+                <i data-lucide="layout-grid" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider uppercase"></span>
+        </div>
+
+        <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar mt-2">
+            <a href="index.html" class="menu-item"><i data-lucide="home" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Dashboard</span></a>
+            <a href="Inv-Invoice.html" class="menu-item"><i data-lucide="file-text" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Invoices</span></a>
+            <a href="Inv-CreditMemo.html" class="menu-item"><i data-lucide="wallet" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Credit Memo</span></a>
+            <a href="#" class="menu-item active"><i data-lucide="repeat" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Transfer</span></a>
+            <a href="Inv-Inventory.html" class="menu-item"><i data-lucide="clipboard-check" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Inventory</span></a>
+            <a href="Inv-Sales.html" class="menu-item"><i data-lucide="pie-chart" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Actual Sales</span></a>
+            <a href="Inv-Sales.html" class="menu-item"><i data-lucide="trending-up" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Forecasted Sales</span></a>
+            <a href="Inv-MenuMix.html" class="menu-item"><i data-lucide="utensils" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Menu Mix</span></a>
+            <a href="Inv-OnHand.html" class="menu-item"><i data-lucide="package" class="w-5"></i><span class="menu-text ml-4 text-[13px]">On Hand</span></a>
+            <a href="#" class="menu-item"><i data-lucide="users" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Employees</span></a>
+            <a href="Inv-Waste.html" class="menu-item"><i data-lucide="trash-2" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Waste</span></a>
+            <a href="#" class="menu-item"><i data-lucide="truck" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Suppliers</span></a>
+            
+            <div class="mt-auto border-t border-slate-800/50 pt-2 mb-4">
+                <a href="Inv-Reports.html" class="menu-item"><i data-lucide="bar-chart-2" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Reports</span></a>
+                
+                <a href="#" class="menu-item mt-4"><i data-lucide="settings" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Settings</span></a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Top Nav (Primary) -->
+        <header class="h-12 bg-[#0f172a] text-white flex items-center justify-between px-4 border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-1 cursor-pointer">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-slate-400"></i>
+                    <span class="text-xs font-semibold text-slate-200">My Apps</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-slate-300 px-3 py-1 rounded cursor-pointer">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span class="font-medium">Costa Mesa</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4 border-r border-slate-700 pr-4">
+                    <div class="flex items-center space-x-2 text-xs font-medium">
+                        <i data-lucide="cloud-snow" class="w-4 h-4 text-blue-300"></i>
+                        <span>-8 °C</span>
+                    </div>
+                    <div class="flex items-center space-x-1 text-xs">
+                        <span class="font-bold">02:53<sup class="text-[8px] opacity-70 ml-0.5">P</sup></span>
+                        <span class="text-slate-400 font-bold uppercase text-[9px] tracking-tight">AMERICA/TORONTO</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-1 bg-slate-800 px-2 py-0.5 rounded cursor-pointer">
+                        <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span class="font-bold text-[11px]">814</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500"></i>
+                    </div>
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-400 cursor-pointer hover:text-white transition-colors"></i>
+                    <div class="w-7 h-7 bg-slate-400 rounded-full flex items-center justify-center text-slate-800 text-[10px] font-bold">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: TRANSFER LIST -->
+        <div id="listView" class="view-container active-view">
+            <div class="bg-white border-b border-slate-200 px-6 py-3 flex flex-col space-y-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="repeat" class="w-4 h-4 text-blue-600"></i>
+                    <h1 class="text-sm font-bold text-slate-700">Transfer</h1>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 bg-white border border-slate-200 rounded px-3 py-1.5 shadow-sm">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span class="text-[11px] font-bold text-slate-600">01/10/2026-02/09/2026</span>
+                        </div>
+                        
+                        <div class="relative">
+                            <button id="filterBtn" class="flex items-center space-x-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 hover:bg-slate-50 transition-colors">
+                                <span class="text-[11px] font-bold text-slate-500">Filters</span>
+                                <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
+                            </button>
+
+                            <div id="filterPopover" class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-xl z-50 p-4 hidden">
+                                <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-slate-200 rotate-45"></div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="text-[13px] font-bold text-slate-700">Status</h3>
+                                    <button id="closeFilter" class="text-slate-300 hover:text-slate-500 transition-colors"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                                </div>
+                                <div class="w-8 h-0.5 bg-blue-500 mb-4"></div>
+                                <div class="space-y-3">
+                                    <label class="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox" checked><span class="text-[12px] font-medium text-slate-600 group-hover:text-slate-900">All</span></label>
+                                    <label class="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox" checked><span class="text-[12px] font-medium text-slate-600 group-hover:text-slate-900">Finalized</span></label>
+                                    <label class="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox" checked><span class="text-[12px] font-medium text-slate-600 group-hover:text-slate-900">Un-Finalized</span></label>
+                                    <label class="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox" checked><span class="text-[12px] font-medium text-slate-600 group-hover:text-slate-900">Declined</span></label>
+                                </div>
+                                <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                                    <button class="px-6 py-2 bg-rose-400 hover:bg-rose-500 text-white font-bold rounded-full text-[11px] transition-colors">Clear</button>
+                                    <button class="px-6 py-2 bg-[#7fb3d5] hover:bg-[#5fa1c7] text-white font-bold rounded-full text-[11px] transition-colors">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toggle-container border border-slate-300">
+                        <button class="toggle-btn active" id="btnOut">Transfer Out</button>
+                        <button class="toggle-btn inactive" id="btnIn">Transfer In</button>
+                    </div>
+                    <div class="w-32"></div>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto bg-white custom-scrollbar">
+                <table class="w-full transfer-table border-collapse">
+                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                        <tr>
+                            <th class="w-48">Transfer ID <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Transfer Date <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th id="dynamicHeader">Transfer To <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Item Value <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Status <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Last Modified By <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th class="text-center">Action(s) <i data-lucide="search" class="w-2.5 h-2.5 inline-block ml-1 text-blue-500"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="transferDataBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 2: TRANSFER DETAIL -->
+        <div id="detailView" class="view-container bg-[#f8fafc]">
+            <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="repeat" class="w-4 h-4 text-blue-600"></i>
+                    <h1 id="detailTitle" class="text-sm font-bold text-slate-700">Transfer Detail</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="bg-[#22d3ee] hover:bg-[#0ea5e9] text-white px-4 py-1.5 rounded text-[11px] font-bold flex items-center transition-all">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 mr-2"></i> Audit Trail
+                    </button>
+                    <button onclick="closeDetailView()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-1.5 rounded text-[11px] font-bold flex items-center transition-all">
+                        <i data-lucide="x" class="w-3.5 h-3.5 mr-2"></i> Close
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 flex flex-col space-y-4">
+                <div class="flex items-start justify-between">
+                    <div class="space-y-1 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-800">Transfer ID:</span>
+                            <span id="detailId" class="text-slate-600">--</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-800" id="detailPartnerLabel">Location:</span>
+                            <span id="detailPartner" class="text-slate-600">--</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="bg-white border border-slate-200 px-3 py-1.5 rounded text-[11px] font-bold text-slate-600 flex items-center shadow-sm hover:bg-slate-50">
+                            <i data-lucide="printer" class="w-3.5 h-3.5 mr-2 text-slate-400"></i> Print <i data-lucide="chevron-down" class="w-3 h-3 ml-2 text-slate-400"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full transfer-table border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50">
+                                <th>Item <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                                <th class="text-center">Unit 1 <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                                <th class="text-center">Unit 2 <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                                <th class="text-center">Unit 3 <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                                <th class="text-center">Unit 4 <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                                <th class="text-right">Item Value <i data-lucide="arrow-up-down" class="w-2 h-2 inline-block opacity-30 ml-1"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailTableBody" class="divide-y divide-slate-100"></tbody>
+                        <tfoot class="bg-white border-t border-slate-200">
+                            <tr>
+                                <td colspan="5" class="text-right py-4 pr-4 font-black text-slate-800 text-[14px]">Total Amount :</td>
+                                <td class="text-right py-4 px-4 font-black text-slate-800 text-[14px]" id="detailTotal">$ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Data Store - Expanded Transfer OUT
+        const transferOutData = [
+            { id: '196412', date: '02/07/2026', partner: 'Branch - Irvine', value: '$ 130.21', status: 'Finalized', user: 'Kyle T' },
+            { id: '196395', date: '02/05/2026', partner: 'Branch - Tustin', value: '$ 84.50', status: 'Finalized', user: 'Sarah M' },
+            { id: '196372', date: '02/04/2026', partner: 'Branch - Costa Mesa', value: '$ 210.15', status: 'Finalized', user: 'Kyle T' },
+            { id: '196360', date: '02/03/2026', partner: 'Branch - Newport', value: '$ 45.90', status: 'Declined', user: 'James R' },
+            { id: '196345', date: '02/03/2026', partner: 'Branch - Laguna', value: '$ 321.00', status: 'Finalized', user: 'Maria G' },
+            { id: '196320', date: '02/01/2026', partner: 'Branch - Irvine', value: '$ 12.50', status: 'Finalized', user: 'Kyle T' },
+            { id: '196310', date: '01/30/2026', partner: 'Branch - Anaheim', value: '$ 88.20', status: 'Un-Finalized', user: 'Sarah M' },
+            { id: '196295', date: '01/28/2026', partner: 'Branch - Tustin', value: '$ 154.00', status: 'Finalized', user: 'James R' },
+            { id: '196280', date: '01/25/2026', partner: 'Branch - Orange', value: '$ 22.10', status: 'Finalized', user: 'Kyle T' },
+            { id: '196265', date: '01/22/2026', partner: 'Branch - Mission Viejo', value: '$ 410.55', status: 'Finalized', user: 'Maria G' }
+        ];
+
+        // Data Store - Expanded Transfer IN
+        const transferInData = [
+            { id: '196412', date: '02/07/2026', partner: '00814-00601', value: '$ 130.21', status: 'Finalized', user: 'Kyle T' },
+            { id: '778121', date: '02/08/2026', partner: 'Warehouse Central', value: '$ 1,200.00', status: 'Finalized', user: 'Admin' },
+            { id: '778130', date: '02/06/2026', partner: 'Regional Hub East', value: '$ 845.22', status: 'Finalized', user: 'Maria G' },
+            { id: '778145', date: '02/05/2026', partner: 'Store #229', value: '$ 14.50', status: 'Un-Finalized', user: 'James R' },
+            { id: '778155', date: '02/04/2026', partner: 'Main Warehouse', value: '$ 2,100.00', status: 'Finalized', user: 'Admin' },
+            { id: '778160', date: '02/03/2026', partner: '00814-00102', value: '$ 33.15', status: 'Finalized', user: 'Sarah M' },
+            { id: '778170', date: '02/02/2026', partner: 'Distribution Center', value: '$ 456.00', status: 'Finalized', user: 'James R' },
+            { id: '778180', date: '02/01/2026', partner: 'Store #112', value: '$ 22.00', status: 'Declined', user: 'Kyle T' },
+            { id: '778195', date: '01/30/2026', partner: 'Regional Hub West', value: '$ 670.00', status: 'Finalized', user: 'Admin' },
+            { id: '778210', date: '01/28/2026', partner: 'Main Warehouse', value: '$ 1,120.40', status: 'Finalized', user: 'Maria G' }
+        ];
+
+        // Mock Item Detail Data (Increased variety)
+        const itemDetails = [
+            { name: 'BOX PIZZA CUSTOM 14IN LITTLE CAESARS', supplier: 'GFS', u1: '4 Bale (50ea)', u2: '0 Pack (50 Bale)', u3: '0 ea', u4: '0 ea', val: '$ 99.88' },
+            { name: 'SPREAD LIQUID CRAZY BREAD', supplier: 'GFS', u1: '0 Case', u2: '1 Bottle(17.5lb)', u3: '0 gal', u4: '0 oz', val: '$ 30.33' },
+            { name: 'PEPPERONI SLICED FZN', supplier: 'GFS', u1: '1 Case (25lb)', u2: '0 lb', u3: '0 oz', u4: '0 ea', val: '$ 85.20' },
+            { name: 'FLOUR ENRICHED HIGH GLUTEN', supplier: 'GFS', u1: '10 Bag (50lb)', u2: '0 lb', u3: '0 oz', u4: '0 ea', val: '$ 210.00' },
+            { name: 'CHEESE MOZZARELLA SHREDDED', supplier: 'GFS', u1: '2 Case (30lb)', u2: '0 lb', u3: '0 oz', u4: '0 ea', val: '$ 144.10' }
+        ];
+
+        let currentView = 'out';
+
+        function renderTransfers() {
+            const body = document.getElementById('transferDataBody');
+            const header = document.getElementById('dynamicHeader');
+            const data = currentView === 'out' ? transferOutData : transferInData;
+            header.innerHTML = `${currentView === 'out' ? 'Transfer To' : 'Transfer From'} <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i>`;
+
+            body.innerHTML = data.map(rec => `
+                <tr class="data-row">
+                    <td class="font-medium text-slate-800">${rec.id}</td>
+                    <td>${rec.date}</td>
+                    <td>${rec.partner}</td>
+                    <td class="font-semibold text-slate-500">${rec.value}</td>
+                    <td>
+                        <span class="${rec.status === 'Finalized' ? 'text-emerald-500' : rec.status === 'Declined' ? 'text-rose-500' : 'text-orange-400'} font-bold">
+                            ${rec.status}
+                        </span>
+                    </td>
+                    <td>${rec.user}</td>
+                    <td class="text-center">
+                        <button onclick="openDetailView('${rec.id}', '${rec.date}', '${rec.partner}', '${rec.value}')" class="p-1 hover:bg-blue-50 rounded transition-colors group">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-blue-400 group-hover:text-blue-600"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // View Toggles
+        function openDetailView(id, date, partner, total) {
+            document.getElementById('listView').classList.remove('active-view');
+            document.getElementById('detailView').classList.add('active-view');
+            
+            document.getElementById('detailTitle').innerText = `Transfer ${currentView === 'out' ? 'Out' : 'In'} ${date}`;
+            document.getElementById('detailId').innerText = id;
+            document.getElementById('detailPartnerLabel').innerText = currentView === 'out' ? 'To:' : 'From:';
+            document.getElementById('detailPartner').innerText = partner;
+            document.getElementById('detailTotal').innerText = total;
+
+            const tableBody = document.getElementById('detailTableBody');
+            tableBody.innerHTML = itemDetails.map(item => `
+                <tr class="data-row">
+                    <td class="py-3">
+                        <div class="font-bold text-slate-700 text-[11px] uppercase">${item.name}</div>
+                        <div class="text-[10px] text-slate-400 uppercase">${item.supplier}</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="font-bold">${item.u1.split(' ')[0]}</span>
+                        <span class="text-slate-400 ml-1 text-[10px]">${item.u1.split(' ').slice(1).join(' ')}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="font-bold">${item.u2.split(' ')[0]}</span>
+                        <span class="text-slate-400 ml-1 text-[10px]">${item.u2.split(' ').slice(1).join(' ')}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="font-bold">${item.u3.split(' ')[0]}</span>
+                        <span class="text-slate-400 ml-1 text-[10px]">${item.u3.split(' ').slice(1).join(' ')}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="font-bold">${item.u4.split(' ')[0]}</span>
+                        <span class="text-slate-400 ml-1 text-[10px]">${item.u4.split(' ').slice(1).join(' ')}</span>
+                    </td>
+                    <td class="text-right font-bold text-slate-700">${item.val}</td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function closeDetailView() {
+            document.getElementById('detailView').classList.remove('active-view');
+            document.getElementById('listView').classList.add('active-view');
+        }
+
+        // Filters Popover Logic
+        const filterBtn = document.getElementById('filterBtn');
+        const filterPopover = document.getElementById('filterPopover');
+        const closeFilter = document.getElementById('closeFilter');
+        filterBtn.onclick = (e) => { e.stopPropagation(); filterPopover.classList.toggle('hidden'); };
+        closeFilter.onclick = () => filterPopover.classList.add('hidden');
+        window.onclick = (e) => { if (!filterPopover.contains(e.target) && e.target !== filterBtn) filterPopover.classList.add('hidden'); };
+
+        // Toggle Buttons Logic
+        document.getElementById('btnOut').onclick = () => { currentView = 'out'; document.getElementById('btnOut').className = 'toggle-btn active'; document.getElementById('btnIn').className = 'toggle-btn inactive'; renderTransfers(); };
+        document.getElementById('btnIn').onclick = () => { currentView = 'in'; document.getElementById('btnIn').className = 'toggle-btn active'; document.getElementById('btnOut').className = 'toggle-btn inactive'; renderTransfers(); };
+
+        window.onload = renderTransfers;
+    </script>
+</body>
+</html>

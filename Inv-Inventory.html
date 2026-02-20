@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Inventory Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+	    /* Table layout ko clean banane ke liye */
+.data-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+}
+.value-sub { font-size: 9px; color: #94a3b8; }
+.status-alert { color: #ef4444; animation: pulse 2s infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
+
+        
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Sidebar Styling - Hover expansion */
+        .sidebar-bg {
+            background-color: #111827;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 72px; 
+            overflow-x: hidden;
+            z-index: 100;
+        }
+        .sidebar-bg:hover { width: 260px; }
+
+        .nav-link {
+            display: flex; align-items: center; padding: 0.75rem 0; padding-left: 1.5rem;
+            color: #94a3b8; transition: all 0.2s; border-left: 4px solid transparent;
+            white-space: nowrap; min-width: 260px; cursor: pointer;
+        }
+        .nav-link i { font-size: 1.1rem; min-width: 24px; text-align: center; }
+        .nav-link span { margin-left: 1.25rem; opacity: 0; transition: opacity 0.2s; }
+        .sidebar-bg:hover .nav-link span { opacity: 1; }
+        .nav-link:hover { color: #ffffff; background-color: #1f2937; }
+        .nav-link.active { color: #ffffff; background-color: #1e293b; border-left-color: #3b82f6; }
+
+        /* Shared Components */
+        .header-bg { background-color: #111827; }
+        .tab-btn {
+            padding: 10px 16px; font-size: 12px; font-weight: 600; color: #64748b;
+            display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .tab-btn.active { color: #6366f1; border-bottom-color: #6366f1; background-color: #f5f3ff; }
+
+        .hidden-view { display: none !important; }
+
+        /* Tables & Inputs */
+        .table-header { background-color: #f8fafc; color: #475569; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .input-count { width: 60px; height: 32px; text-align: center; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 13px; font-family: monospace; }
+        .unit-label { font-size: 10px; color: #94a3b8; width: 80px; margin-left: 6px; }
+
+        /* Charts Simulation */
+        .pie-placeholder {
+            width: 100px; height: 100px; border-radius: 50%; position: relative;
+            background: conic-gradient(#6366f1 0% 15%, #f97316 15% 45%, #2dd4bf 45% 55%, #991b1b 55% 65%, #4ade80 65% 75%, #be185d 75% 85%, #f87171 85% 95%, #1e3a8a 95% 100%);
+        }
+        .pie-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; }
+
+        /* Diagnostic Modal Cards */
+        .diagnostic-card { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 14px; min-width: 130px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .diag-navy { background-color: #0f172a; color: white; }
+        .math-symbol { width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin: 0 4px; border: 1px solid #e2e8f0; }
+        .status-pill { position: absolute; top: -8px; right: 8px; font-size: 8px; font-weight: 800; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+        .status-error { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+        .status-ref { background: #dcfce7; color: #10b981; border: 1px solid #bbf7d0; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+		
+		/* Styling for category headers and status badges */
+.category-header { background-color: #f1f5f9; border-left: 4px solid #6366f1; }
+.alert-pill { background-color: #fee2e2; color: #ef4444; border: 1px solid #fecaca; font-size: 10px; padding: 2px 8px; border-radius: 9999px; font-weight: 700; }
+.count-input-new { width: 45px; height: 32px; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; font-size: 12px; color: #1e293b; transition: all 0.2s; }
+.count-input-new:focus { border-color: #6366f1; ring: 2px; ring-color: #6366f1/20; outline: none; }
+.sticky-footer { background: white; border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); }
+
+/* Merged Column Styles */
+.val-main { display: block; font-weight: 700; color: #1e293b; font-size: 11px; }
+.val-sub { display: block; font-size: 9px; font-weight: 500; color: #64748b; margin-top: 1px; }
+
+/* Days On Hand Badge */
+.doh-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 9px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.doh-low { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+.val-container { display: flex; flex-direction: column; align-items: flex-end; }
+.val-main { font-weight: 700; color: #1e293b; font-size: 11px; line-height: 1; }
+.val-sub { font-size: 9px; font-weight: 500; color: #64748b; margin-top: 2px; }
+
+/* Responsive Container */
+.table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Fixed width hatakar dynamic width dena */
+.responsive-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Sticky Columns with dynamic widths */
+.sticky-id {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: white !important;
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+}
+
+.sticky-name {
+    position: sticky;
+    left: 80px; /* Ye dynamic adjust hoga approx ID size ke baad */
+    z-index: 20;
+    background: white !important;
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+}
+
+/* Header fix */
+.responsive-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #f8fafc;
+    white-space: nowrap; /* Header text ko wrap hone se rokta hai */
+}
+
+.table-scroll-wrapper {
+    overflow-x: auto;
+}
+.responsive-table th.sticky-id, 
+.responsive-table td.sticky-id {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+}
+.responsive-table th.sticky-name, 
+.responsive-table td.sticky-name {
+    position: sticky;
+    left: 110px; /* Adjust according to ID column width */
+    z-index: 20;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Sidebar scrolling properties */
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Nav Link Hover behavior for long lists */
+.nav-link:hover span {
+    opacity: 1;
+}
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR: Hover to Expand -->
+    <aside class="sidebar-bg flex-shrink-0 flex flex-col shadow-2xl">
+    <div class="h-14 flex items-center px-4 flex-shrink-0">
+        <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white shadow-lg cursor-pointer">
+            <i class="fas fa-th-large text-sm"></i>
+        </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pt-2">
+        <a href="index.html" class="nav-link">
+            <i class="fas fa-home"></i> <span>Dashboard</span>
+        </a>
+        <a href="Inv-Invoice.html" class="nav-link">
+            <i class="fas fa-file-invoice"></i> <span>Invoices</span>
+        </a>
+        <a href="Inv-CreditMemo.html" class="nav-link">
+            <i class="fas fa-undo"></i> <span>Credit Memo</span>
+        </a>
+        <a href="Inv-Transfers.html" class="nav-link">
+            <i class="fas fa-exchange-alt"></i> <span>Transfer</span>
+        </a>
+        <a href="Inv-Inventory.html" class="nav-link active">
+            <i class="fas fa-clipboard-list"></i> <span>Inventory</span>
+        </a>
+        <a href="Inv-Sales.html" class="nav-link">
+            <i class="fas fa-chart-pie"></i> <span>Actual Sales</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-chart-line"></i> <span>Forecasted Sales</span>
+        </a>
+        <a href="Inv-MenuMix.html" class="nav-link">
+            <i class="fas fa-utensils"></i> <span>Menu Mix</span>
+        </a>
+        <a href="Inv-OnHand.html" class="nav-link">
+            <i class="fas fa-box-open"></i> <span>On Hand</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-users"></i> <span>Employees</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-trash-alt"></i> <span>Waste</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-truck-loading"></i> <span>Supplier Item Price List</span>
+        </a>
+    </nav>
+
+    <div class="mt-auto border-t border-slate-800/50 pt-2 pb-4">
+        <a href="Inv-Reports.html" class="nav-link">
+            <i class="fas fa-chart-bar"></i> <span>Reports</span>
+        </a>
+        
+    </div>
+</aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- HEADER -->
+        <header class="header-bg h-16 flex items-center justify-between px-6 text-white shrink-0 shadow-md">
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center space-x-2 cursor-pointer group">
+                    <span class="text-[10px] font-bold uppercase tracking-widest opacity-60">My Apps</span>
+                    <i class="fas fa-chevron-down text-[10px] opacity-40"></i>
+                </div>
+                <div class="flex items-center space-x-2 cursor-pointer">
+                    <i class="fas fa-map-marker-alt text-blue-400"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-widest">Costa Mesa</span>
+                    <i class="fas fa-chevron-down text-[10px] opacity-40 ml-1"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-3 text-xs">
+                    <i class="fas fa-sun text-yellow-400"></i>
+                    <div class="flex flex-col items-end leading-tight">
+                        <span class="font-bold tracking-tight">09:20<sup>A</sup></span>
+                        <span class="text-[8px] opacity-40 uppercase">AMERICA/LOS ANGELES</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center bg-gray-800 px-3 py-1 rounded-full border border-gray-700">
+                        <i class="fas fa-coins text-yellow-500 mr-2 text-xs"></i>
+                        <span class="text-xs font-bold">814</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white border border-gray-700">
+                        <i class="fas fa-user text-xs"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: Main Inventory List -->
+        <div id="viewList" class="flex flex-col flex-1 overflow-hidden">
+            <div class="bg-white border-b border-slate-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="fas fa-clipboard-check text-sm"></i></div>
+                        <div><h1 class="text-lg font-bold text-slate-800 leading-none">Inventory</h1><p class="text-[10px] text-slate-400 font-bold uppercase mt-1"></p></div>
+                    </div>
+                    <button class="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg text-xs font-bold shadow-md">ADD NEW</button>
+                </div>
+                <div class="px-6 py-3 bg-slate-50 flex items-center space-x-4 border-t border-slate-100">
+                    <div class="flex items-center bg-white border border-slate-200 rounded px-3 py-1.5 shadow-sm text-[13px] font-semibold text-slate-600">
+                        <i class="far fa-calendar-alt text-slate-400 mr-2"></i> Feb 01, 2026 - Feb 09, 2026
+                    </div>
+                    <button class="bg-white border border-slate-200 px-4 py-1.5 rounded text-[13px] font-bold text-slate-500 uppercase tracking-wide">Filters <i class="fas fa-sliders-h ml-1 text-slate-300"></i></button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-6 bg-slate-100/50">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse min-w-[1200px]">
+                        <thead>
+                            <tr class="table-header border-b border-slate-100">
+                                <th class="px-12 py-4">Inv. Date</th>
+                                <th class="px-12 py-4">Frequency</th>
+                                <th class="px-12 py-4">Opening Date</th>
+                                <th class="px-12 py-4">Sales $</th>
+                                <th class="px-12 py-4">Deliveries $</th>
+								 <th class="px-12 py-4">Actual Usage %</th>
+                                <th class="px-12 py-4">Ideal Usage %</th>
+                                <th class="px-12 py-4">Variance %</th>
+                                <th class="px-12 py-4">Inv. Value</th>
+                                <th class="px-12 py-4 text-center">Status</th>
+                                <th class="px-12 py-4 text-right">Action(s)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-[12px] text-slate-600">
+                            <tr class="hover:bg-blue-50/30 transition-colors border-b border-slate-50 group">
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/04/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">Daily</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/03/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,995.69</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,348.79</td>
+								<td class="px-10 py-4 font-semibold text-slate-800">22.40% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">21.80% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">0.60% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 10,473.35 <i class="fas fa-arrow-down text-rose-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 text-center"><span class="bg-slate-100 px-2 py-1 rounded font-bold text-[9px] uppercase">Finalized</span></td>
+                                <td class="px-10 py-4 text-right">
+                                    <div class="flex justify-end space-x-3 opacity-60 group-hover:opacity-100 items-center">
+									<a href="Inv-Siva.html" class="inline-flex items-center transition-colors text-blue-400 hover:text-blue-600" title="View Detail">
+										<i class="far fa-eye cursor-pointer"></i>
+									</a>
+
+										<i class="far fa-trash-alt text-red-400 cursor-pointer hover:text-red-600 transition-colors"></i>
+									</div>
+                                </td>
+                            </tr>
+							<tr class="hover:bg-blue-50/30 transition-colors border-b border-slate-50 group">
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/04/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">Daily</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/03/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,995.69</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,348.79</td>
+								<td class="px-10 py-4 font-semibold text-slate-800">22.40% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">21.80% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">0.60% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 10,473.35 <i class="fas fa-arrow-down text-rose-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 text-center"><span class="bg-slate-100 px-2 py-1 rounded font-bold text-[9px] uppercase">Finalized</span></td>
+                                <td class="px-10 py-4 text-right">
+                                    <div class="flex justify-end space-x-3 opacity-60 group-hover:opacity-100 items-center">
+									<a href="Inv-Siva.html" class="inline-flex items-center transition-colors text-blue-400 hover:text-blue-600" title="View Detail">
+										<i class="far fa-eye cursor-pointer"></i>
+									</a>
+
+										<i class="far fa-trash-alt text-red-400 cursor-pointer hover:text-red-600 transition-colors"></i>
+									</div>
+                                </td>
+                            </tr>
+							<tr class="hover:bg-blue-50/30 transition-colors border-b border-slate-50 group">
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/04/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">Daily</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">02/03/2026</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,995.69</td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 4,348.79</td>
+								<td class="px-10 py-4 font-semibold text-slate-800">22.40% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">21.80% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">0.60% <i class="fas fa-arrow-up text-emerald-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 font-semibold text-slate-800">$ 10,473.35 <i class="fas fa-arrow-down text-rose-500 text-[9px] ml-1"></i></td>
+                                <td class="px-10 py-4 text-center"><span class="bg-slate-100 px-2 py-1 rounded font-bold text-[9px] uppercase">Finalized</span></td>
+                                <td class="px-10 py-4 text-right">
+                                    <div class="flex justify-end space-x-3 opacity-60 group-hover:opacity-100 items-center">
+									<a href="Inv-Siva.html" class="inline-flex items-center transition-colors text-blue-400 hover:text-blue-600" title="View Detail">
+										<i class="far fa-eye cursor-pointer"></i>
+									</a>
+
+										<i class="far fa-trash-alt text-red-400 cursor-pointer hover:text-red-600 transition-colors"></i>
+									</div>
+                                </td>
+                            </tr>
+							
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHARED INNER NAVIGATION (Tabs) -->
+        <div id="innerTabs" class="hidden-view bg-white border-b border-slate-200">
+            <div class="flex items-center justify-between px-4">
+                <div class="flex space-x-2">
+                    <button onclick="switchView('count')" id="tabItemCount" class="tab-btn active"><i class="fas fa-list-ul mr-2"></i> Item Count</button>
+                    <button onclick="switchView('variance')" id="tabVariance" class="tab-btn"><i class="fas fa-balance-scale mr-2"></i> Variance</button>
+                    <button class="tab-btn"><i class="fas fa-file-invoice mr-2"></i> Inventory Breakdown</button>
+                    <button class="tab-btn"><i class="fas fa-history mr-2"></i> Audit Trail</button>
+                </div>
+                <div class="flex items-center space-x-2 py-2">
+                    <button onclick="switchView('list')" class="bg-rose-500 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center hover:bg-rose-600 shadow-sm transition-all"><i class="fas fa-times mr-1.5"></i> Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Detailed Item Count -->
+       <div id="viewCount" class="flex flex-col flex-1 overflow-hidden hidden-view bg-[#f8fafc]">
+    <div class="px-4 py-2 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-slate-100 px-3 py-1.5 rounded-md border border-slate-200 text-[11px] font-bold text-slate-600">
+                Weekly - 02/06/2026
+            </div>
+            <div class="relative">
+                <input type="text" placeholder="Search items or SKUs..." class="pl-8 pr-4 py-1.5 border border-slate-200 rounded-md w-72 text-xs outline-none focus:border-indigo-500">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+            </div>
+            <button class="text-[11px] font-bold text-slate-500 flex items-center px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">
+                Locations <i class="fas fa-chevron-down ml-2 text-[8px]"></i>
+            </button>
+        </div>
+        <button class="bg-[#6366f1] hover:bg-indigo-700 text-white px-4 py-1.5 rounded-md text-[11px] font-bold flex items-center shadow-sm">
+            <i class="far fa-check-circle mr-2"></i> FINALIZE
+        </button>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4 py-2">
+        <table class="w-full text-left border-separate border-spacing-y-1">
+            <thead>
+                <tr class="text-[9px] uppercase font-black text-slate-400 tracking-wider">
+                    <th class="px-4 py-2 w-[350px]">Item Detail</th>
+                    <th class="px-2 py-2 text-center">Count 1</th>
+                    <th class="px-2 py-2 text-center">Count 2</th>
+                    <th class="px-2 py-2 text-center">Count 3</th>
+                    <th class="px-2 py-2 text-center">Count 4</th>
+                    <th class="px-2 py-2 text-center">Warning</th>
+                    <th class="px-2 py-2 text-right">Total Qty</th>
+                    <th class="px-4 py-2 text-right">Inv Value</th>
+                </tr>
+            </thead>
+            <tbody id="newCountTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="sticky-footer px-6 py-3 flex items-center justify-between shrink-0">
+        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <button class="px-4 py-1 text-[10px] font-bold bg-white rounded shadow-sm text-indigo-600">ALL</button>
+            <button class="px-4 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-800">COUNTED</button>
+            <button class="px-4 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-800">UNCOUNTED</button>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="bg-rose-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black flex items-center animate-pulse">
+                <i class="fas fa-exclamation-triangle mr-2"></i> 5 ALERTS FOUND
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Session Value</span>
+                <span class="text-xl font-black text-slate-800">$ 1,389.50</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- VIEW 3: Variance (Summary + Detail Integrated) -->
+        <div id="viewVariance" class="flex flex-col flex-1 overflow-hidden hidden-view bg-white">
+    <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-4">
+            <div class="text-xs font-bold text-slate-700">
+                <i class="fas fa-calendar-alt text-slate-400 mr-2"></i> Daily - 02/04/2026
+            </div>
+            <div class="flex bg-slate-200 rounded-md p-1">
+                <button onclick="toggleVarianceMode('detail')" id="btnVarDetail" class="bg-white px-3 py-1 rounded text-[10px] font-bold shadow-sm">Detail</button>
+                <button onclick="toggleVarianceMode('summary')" id="btnVarSummary" class="px-3 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors">Summary</button>
+            </div>
+        </div>
+
+        <div id="centerStats" class="flex items-center space-x-4">
+    
+    <div class="bg-white border border-slate-200 shadow-sm rounded-lg px-4 py-1.5 flex flex-col items-center">
+        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-tight">Sales</span>
+        <span class="text-sm font-black text-slate-800 tracking-tight">$ 4,995.69</span>
+    </div>
+
+    <div class="bg-rose-50 border border-rose-100 shadow-sm rounded-lg px-4 py-1.5 flex items-center space-x-6">
+        <div class="flex flex-col items-center border-r border-rose-200 pr-6">
+            <span class="text-[8px] font-black text-rose-400 uppercase tracking-widest leading-tight">Variance $</span>
+            <div class="flex items-center space-x-1">
+                <span class="text-sm font-black text-rose-600 tracking-tight">$ -2,880.58</span>
+                <i class="fas fa-arrow-down text-[10px] text-rose-500"></i>
+            </div>
+        </div>
+        <div class="flex flex-col items-center">
+            <span class="text-[8px] font-black text-rose-400 uppercase tracking-widest leading-tight">Variance %</span>
+            <span class="text-sm font-black text-rose-600 tracking-tight">-57.65%</span>
+        </div>
+    </div>
+
+</div>
+        <button class="bg-sky-500 text-white px-4 py-1.5 rounded text-[11px] font-bold shadow-md uppercase">Un-Finalize</button>
+    </div>
+
+    <div class="flex-1 overflow-auto bg-white">
+        <div id="varDetailContent" class="inline-block min-w-full align-middle">
+            <div class="table-scroll-wrapper">
+    <div class="table-scroll-wrapper overflow-x-auto">
+    <table class="responsive-table w-full text-left border-collapse">
+        <thead>
+            <tr class="text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 bg-slate-50">
+                <th class="sticky left-0 z-30 bg-slate-50 px-4 py-4 border-r border-slate-200">Ingr. ID</th>
+                <th class="sticky left-[80px] z-30 bg-slate-50 px-4 py-4 border-r border-slate-200">Item Name</th>
+                
+                <th class="px-4 py-4 text-center">Unit</th>
+                <th class="px-4 py-4 text-right">Cost $</th>
+                <th class="px-4 py-4 text-right">Opening | $</th>
+                <th class="px-4 py-4 text-right">Deliveries | $</th>
+                <th class="px-4 py-4 text-right">Transfer In | $</th>
+                <th class="px-4 py-4 text-right">Transfer Out | $</th>
+                <th class="px-4 py-4 text-right">Closing | $</th>
+                <th class="px-4 py-4 text-right bg-blue-50/50">Actual Use | $ | %</th>
+                <th class="px-4 py-4 text-right">Ideal Use | $ | %</th>
+                <th class="px-4 py-4 text-right">Variance | $ | %</th>
+                <th class="px-4 py-4 text-right">Ideal Waste | $</th>
+                <th class="px-4 py-4 text-right">Recipe Use | $</th>
+                <th class="px-4 py-4 text-right">Misc. Waste | $</th>
+                <th class="px-4 py-4 text-center">Days On Hand</th>
+            </tr>
+        </thead>
+        <tbody class="text-[10px] text-slate-600 font-medium">
+            <tr class="bg-slate-100 font-bold uppercase border-y border-slate-200">
+                <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">BEVERAGE COST</td>
+                <td colspan="2"></td> 
+                <td class="px-4 py-2 text-right">$ 976.60</td> 
+                <td class="px-4 py-2 text-right">$ 214.10</td> 
+                <td class="px-4 py-2 text-right">$ 0.00</td>
+                <td class="px-4 py-2 text-right">$ 0.00</td>
+                <td class="px-4 py-2 text-right">$ 1,106.20</td>
+                <td class="px-4 py-2 text-right text-slate-900">0.23% | $ 84.56</td> 
+                <td class="px-4 py-2 text-right text-slate-900">0.20% | $ 78.42</td> 
+                <td class="px-4 py-2 text-right text-emerald-500">0.03% | $ 6.14</td> 
+                <td class="px-4 py-2 text-right">$ 0.00</td>
+                <td class="px-4 py-2 text-right">$ 78.47</td>
+                <td class="px-4 py-2 text-right">$ 0.00</td>
+                <td colspan="2"></td>
+            </tr>
+
+            <tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210951</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">2L Bottle Coke</td>
+                <td class="px-4 py-2 text-center">ea</td>
+                <td class="px-4 py-2 text-right font-mono">$1.84</td>
+                <td class="px-4 py-2 text-right">346.0 | $636.6</td>
+                <td class="px-4 py-2 text-right">24.0 | $44.1</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">361.0 | $664.2</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">9.00</span><span class="val-sub">0.23% | $16.5</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">0.20% | $14.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">1.00</span><span class="val-sub text-emerald-500">0.03% | $1.8</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">$14.72</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">37.4</span></td>
+            </tr>
+
+            <tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('Diet Coke Syrup', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210955</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Diet Coke Syrup</td>
+                <td class="px-4 py-2 text-center">BIB</td>
+                <td class="px-4 py-2 text-right font-mono">$85.00</td>
+                <td class="px-4 py-2 text-right">4.0 | $340.0</td>
+                <td class="px-4 py-2 text-right">2.0 | $170.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">5.2 | $442.0</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">0.80</span><span class="val-sub">0.94% | $68.0</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">0.88% | $63.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.05</span><span class="val-sub text-rose-500">-0.06% | $-4.2</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">$63.75</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">12.1</span></td>
+            </tr>
+
+            <tr class="bg-slate-100 font-bold uppercase border-y border-slate-200">
+                <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">MEAT COST</td>
+                <td colspan="2"></td>
+                <td class="px-4 py-2 text-right">$ 735.20</td>
+                <td class="px-4 py-2 text-right">$ 382.50</td>
+                <td class="px-4 py-2 text-right">$ 10.20</td>
+                <td class="px-4 py-2 text-right">$ 21.20</td>
+                <td class="px-4 py-2 text-right">$ 887.40</td>
+                <td class="px-4 py-2 text-right text-slate-900">1.12% | $ 219.30</td>
+                <td class="px-4 py-2 text-right text-slate-900">1.10% | $ 213.10</td>
+                <td class="px-4 py-2 text-right text-rose-500">-1.12% | $ -32.40</td>
+                <td class="px-4 py-2 text-right">$ 1.40</td>
+                <td class="px-4 py-2 text-right">$ 211.74</td>
+                <td class="px-4 py-2 text-right">$ 0.40</td>
+                <td colspan="2"></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('Diet Coke Syrup', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210955</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Diet Coke Syrup</td>
+                <td class="px-4 py-2 text-center">BIB</td>
+                <td class="px-4 py-2 text-right font-mono">$85.00</td>
+                <td class="px-4 py-2 text-right">4.0 | $340.0</td>
+                <td class="px-4 py-2 text-right">2.0 | $170.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">5.2 | $442.0</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">0.80</span><span class="val-sub">0.94% | $68.0</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">0.88% | $63.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.05</span><span class="val-sub text-rose-500">-0.06% | $-4.2</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">$63.75</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">12.1</span></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('Diet Coke Syrup', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210955</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Diet Coke Syrup</td>
+                <td class="px-4 py-2 text-center">BIB</td>
+                <td class="px-4 py-2 text-right font-mono">$85.00</td>
+                <td class="px-4 py-2 text-right">4.0 | $340.0</td>
+                <td class="px-4 py-2 text-right">2.0 | $170.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">5.2 | $442.0</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">0.80</span><span class="val-sub">0.94% | $68.0</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">0.88% | $63.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.05</span><span class="val-sub text-rose-500">-0.06% | $-4.2</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">$63.75</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">12.1</span></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('Diet Coke Syrup', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210955</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Diet Coke Syrup</td>
+                <td class="px-4 py-2 text-center">BIB</td>
+                <td class="px-4 py-2 text-right font-mono">$85.00</td>
+                <td class="px-4 py-2 text-right">4.0 | $340.0</td>
+                <td class="px-4 py-2 text-right">2.0 | $170.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">5.2 | $442.0</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">0.80</span><span class="val-sub">0.94% | $68.0</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">0.88% | $63.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.05</span><span class="val-sub text-rose-500">-0.06% | $-4.2</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">$63.75</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">12.1</span></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210951</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">2L Bottle Coke</td>
+                <td class="px-4 py-2 text-center">ea</td>
+                <td class="px-4 py-2 text-right font-mono">$1.84</td>
+                <td class="px-4 py-2 text-right">346.0 | $636.6</td>
+                <td class="px-4 py-2 text-right">24.0 | $44.1</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">361.0 | $664.2</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">9.00</span><span class="val-sub">0.23% | $16.5</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">0.20% | $14.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">1.00</span><span class="val-sub text-emerald-500">0.03% | $1.8</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">$14.72</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">37.4</span></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210951</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">2L Bottle Coke</td>
+                <td class="px-4 py-2 text-center">ea</td>
+                <td class="px-4 py-2 text-right font-mono">$1.84</td>
+                <td class="px-4 py-2 text-right">346.0 | $636.6</td>
+                <td class="px-4 py-2 text-right">24.0 | $44.1</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">361.0 | $664.2</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">9.00</span><span class="val-sub">0.23% | $16.5</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">0.20% | $14.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">1.00</span><span class="val-sub text-emerald-500">0.03% | $1.8</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">$14.72</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">37.4</span></td>
+            </tr>
+			<tr class="hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')">
+                <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">210951</td>
+                <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">2L Bottle Coke</td>
+                <td class="px-4 py-2 text-center">ea</td>
+                <td class="px-4 py-2 text-right font-mono">$1.84</td>
+                <td class="px-4 py-2 text-right">346.0 | $636.6</td>
+                <td class="px-4 py-2 text-right">24.0 | $44.1</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right">361.0 | $664.2</td>
+                <td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">9.00</span><span class="val-sub">0.23% | $16.5</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">0.20% | $14.7</span></div></td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">1.00</span><span class="val-sub text-emerald-500">0.03% | $1.8</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">8.00</span><span class="val-sub">$14.72</span></div></td>
+                <td class="px-4 py-2 text-right">0.0 | $0.0</td>
+                <td class="px-4 py-2 text-center"><span class="doh-badge">37.4</span></td>
+            </tr>
+            </tbody>
+    </table>
+</div>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+    </div>
+
+    <!-- DIAGNOSTIC MODAL OVERLAY -->
+    <div id="diagModal" class="hidden-view fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-6xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+            <div class="px-8 py-6 flex items-center justify-between">
+    <div class="flex items-center">
+        <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mr-4 shadow-xl">
+            <i class="fas fa-calculator text-lg"></i>
+        </div>
+        <div>
+            <h2 id="diagName" class="text-xl font-black text-slate-800 leading-none">2L Bottle</h2>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mt-1">
+                <span id="diagCat">BEVERAGE COST</span> • Full Diagnostic Analysis
+            </p>
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-3">
+        <button onclick="toggleTrendView()" class="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all border border-slate-200 mr-2">
+    <i class="fas fa-chart-line text-xs"></i>
+    <span class="text-[10px] font-bold uppercase tracking-wider">Summary Trend</span>
+</button>
+		
+        <button onclick="closeDiagnostic()" class="w-10 h-10 rounded-full hover:bg-slate-100 transition-colors flex items-center justify-center text-slate-400 border border-slate-100">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+            <div class="flex-1 overflow-y-auto p-8 pt-0 space-y-6">
+			<div id="trendView" class="hidden-view pt-6">
+        <div class="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm">
+            <table class="w-full text-left text-[11px] border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-4 font-bold text-slate-500">Date</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Actual Usage $</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Actual Usage %</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Theo. Usage $</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Theo. Usage %</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Variance $</th>
+                        <th class="px-4 py-4 font-bold text-slate-500 text-right">Variance %</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">02/26/2026 - 03/10/2026</td>
+        <td class="px-4 py-4 text-right">$1.08</td>
+        <td class="px-4 py-4 text-right">18.4%</td>
+        <td class="px-4 py-4 text-right">$5.08</td>
+        <td class="px-4 py-4 text-right">3.89%</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">$21.08</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">0.32%</td>
+    </tr>
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">02/12/2026 - 02/26/2026</td>
+        <td class="px-4 py-4 text-right">$5.60</td>
+        <td class="px-4 py-4 text-right">1.00%</td>
+        <td class="px-4 py-4 text-right">$1.10</td>
+        <td class="px-4 py-4 text-right">1.60%</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">$21.60</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">0.13%</td>
+    </tr>
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">01/30/2026 - 02/12/2026</td>
+        <td class="px-4 py-4 text-right">$7.20</td>
+        <td class="px-4 py-4 text-right">0.50%</td>
+        <td class="px-4 py-4 text-right">$5.60</td>
+        <td class="px-4 py-4 text-right">0.18%</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">$21.60</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">0.02%</td>
+    </tr>
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">01/16/2026 - 01/30/2026</td>
+        <td class="px-4 py-4 text-right">$4.91</td>
+        <td class="px-4 py-4 text-right">0.31%</td>
+        <td class="px-4 py-4 text-right">$7.23</td>
+        <td class="px-4 py-4 text-right">0.09%</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">$17.91</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">0.01%</td>
+    </tr>
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">01/02/2026 - 01/16/2026</td>
+        <td class="px-4 py-4 text-right">$6.98</td>
+        <td class="px-4 py-4 text-right">1.00%</td>
+        <td class="px-4 py-4 text-right">$1.06</td>
+        <td class="px-4 py-4 text-right">0.00%</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">$21.98</td>
+        <td class="px-4 py-4 text-right text-emerald-600 font-bold">0.01%</td>
+    </tr>
+    <tr class="hover:bg-slate-50/50">
+        <td class="px-6 py-4 font-medium">12/20/2025 - 01/02/2026</td>
+        <td class="px-4 py-4 text-right">$5.60</td>
+        <td class="px-4 py-4 text-right">10.00%</td>
+        <td class="px-4 py-4 text-right">$1.10</td>
+        <td class="px-4 py-4 text-right">0.00%</td>
+        <td class="px-4 py-4 text-right text-rose-500 font-bold">$6.06</td>
+        <td class="px-4 py-4 text-right text-rose-500 font-bold">0.00%</td>
+    </tr>
+</tbody>
+            </table>
+        </div>
+    </div>
+
+   <div id="diagnosticMainView" class="space-y-4 animate-in fade-in duration-300 max-w-5xl mx-auto">
+    
+    <div class="bg-slate-50/50 rounded-[24px] p-6 border border-slate-100 relative">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center">
+            <span class="w-6 h-px bg-blue-500 mr-2"></span> Usage Flow: Deriving Actual Consumption
+        </h4>
+        
+        <div class="flex items-center justify-between px-2">
+            <div class="diagnostic-card border-amber-100 bg-white shadow-sm w-32 p-3">
+                <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-amber-100 text-amber-600 text-[8px] font-bold border border-amber-200">
+                    Warning
+                </span>
+                <div class="text-[8px] font-bold text-slate-400 uppercase mb-1 text-center">Opening</div>
+                <div class="text-xl font-black text-slate-800 text-center">180</div>
+                <div class="bg-slate-50 rounded py-0.5 my-1 text-center text-[9px] font-bold text-slate-500">138,934.8</div>
+                <div class="text-[8px] font-bold text-amber-500 uppercase text-center mt-1">$ 771.86</div>
+            </div>
+
+            <div class="text-emerald-500 text-sm"><i class="fas fa-plus"></i></div>
+
+            <div class="diagnostic-card bg-white border-slate-100 w-32 p-3 shadow-sm">
+                <div class="text-[8px] font-bold text-slate-400 uppercase mb-1 text-center">Transfer In</div>
+                <div class="text-xl font-black text-slate-800 text-center">0</div>
+                <div class="bg-slate-50 rounded py-0.5 my-1 text-center text-[9px] font-bold text-slate-300 italic">0.0</div>
+                <div class="text-[8px] font-bold text-blue-500 uppercase text-center mt-1">$ 0.00</div>
+            </div>
+
+            <div class="text-emerald-500 text-sm"><i class="fas fa-plus"></i></div>
+
+            <div class="diagnostic-card border-emerald-200 bg-white shadow-sm w-32 p-3">
+                <span class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-emerald-500 text-white text-[8px] font-bold">Source</span>
+                <div class="text-[8px] font-bold text-slate-400 uppercase mb-1 text-center">Deliveries</div>
+                <div class="text-xl font-black text-slate-800 text-center">160</div>
+                <div class="bg-emerald-50/50 rounded py-0.5 my-1 text-center text-[9px] font-bold text-emerald-600">119,891.2</div>
+                <div class="text-[8px] font-bold text-emerald-500 uppercase text-center mt-1">$ 749.32</div>
+            </div>
+
+            <div class="text-rose-500 text-sm"><i class="fas fa-minus"></i></div>
+
+            <div class="diagnostic-card border-blue-100 bg-white shadow-sm w-32 p-3">
+                <div class="text-[8px] font-bold text-slate-400 uppercase mb-1 text-center">Closing</div>
+                <div class="text-xl font-black text-slate-800 text-center">188</div>
+                <div class="bg-slate-50 rounded py-0.5 my-1 text-center text-[9px] font-bold text-slate-500">140,872.16</div>
+                <div class="text-[8px] font-bold text-blue-600 uppercase text-center mt-1">$ 749.32</div>
+            </div>
+
+            <div class="text-blue-500 text-sm"><i class="fas fa-equals"></i></div>
+
+            <div class="diagnostic-card bg-[#0f172a] border-none shadow-lg w-36 p-4">
+                <div class="text-[8px] font-bold text-indigo-300 uppercase mb-1 text-center">Actual Usage</div>
+                <div class="text-2xl font-black text-white text-center">152</div>
+                <div class="bg-white/10 rounded py-1 my-1 text-center text-[10px] font-bold text-white/60">117,953.84</div>
+                <div class="text-[8px] font-bold text-rose-400 uppercase text-center mt-1">$ 776.01</div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-200/60 grid grid-cols-2 gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <p class="text-[10px] text-slate-500 font-medium"><b>Source Reference:</b> Base Unit Cost for benchmarking.</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                <p class="text-[10px] text-slate-500 font-medium"><b>Price Variance:</b> Warning for Unit Cost fluctuation.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[24px] p-8 border border-slate-50 shadow-sm">
+        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center">
+            <span class="w-6 h-px bg-emerald-500 mr-2"></span> Impact Analysis
+        </h4>
+        <div class="flex items-center justify-center space-x-8">
+            <div class="diagnostic-card bg-[#0f172a] border-none w-44 p-5">
+                <div class="text-[8px] uppercase font-bold text-indigo-300 mb-1 text-center">Actual</div>
+                <div class="text-3xl font-black text-white text-center">152</div>
+                <div class="text-[8px] font-bold text-rose-400 uppercase text-center mt-2">$ 776.01</div>
+            </div>
+            <div class="text-rose-500 font-bold">-</div>
+            <div class="diagnostic-card border-blue-100 bg-white w-44 p-5">
+                <div class="text-[8px] uppercase font-bold text-slate-400 mb-1 text-center">Ideal</div>
+                <div class="text-3xl font-black text-slate-800 text-center">152</div>
+                <div class="text-[8px] font-bold text-blue-500 uppercase text-center mt-2">$ 749.32</div>
+            </div>
+            <div class="text-blue-500 font-bold">=</div>
+            <div class="diagnostic-card border-rose-100 bg-rose-50/40 w-52 p-5 text-center">
+                <div class="text-[8px] uppercase font-bold text-rose-400 mb-1">Net Impact</div>
+                <div class="text-4xl font-black text-slate-800">-0.55</div>
+                <div class="mt-2 text-[10px] font-black text-rose-600 bg-rose-100/50 py-1 px-3 rounded-full inline-block">
+                    $ 3,646 Loss
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+			
+            </div>
+
+            
+        </div>
+    </div>
+
+    <script>
+        const views = {
+            list: document.getElementById('viewList'),
+            tabs: document.getElementById('innerTabs'),
+            count: document.getElementById('viewCount'),
+            variance: document.getElementById('viewVariance'),
+            modal: document.getElementById('diagModal'),
+            varSummary: document.getElementById('varSummaryContent'),
+            varDetail: document.getElementById('varDetailContent')
+        };
+
+        const tabItemCount = document.getElementById('tabItemCount');
+        const tabVariance = document.getElementById('tabVariance');
+
+        function switchView(viewName) {
+            // Hide all
+            views.list.classList.add('hidden-view');
+            views.tabs.classList.add('hidden-view');
+            views.count.classList.add('hidden-view');
+            views.variance.classList.add('hidden-view');
+
+            if (viewName === 'list') {
+                views.list.classList.remove('hidden-view');
+            } else {
+                views.tabs.classList.remove('hidden-view');
+                tabItemCount.classList.remove('active');
+                tabVariance.classList.remove('active');
+
+                if (viewName === 'count') {
+                    views.count.classList.remove('hidden-view');
+                    tabItemCount.classList.add('active');
+                } else if (viewName === 'variance') {
+                    views.variance.classList.remove('hidden-view');
+                    tabVariance.classList.add('active');
+                    toggleVarianceMode('detail'); // Reset to detail
+                }
+            }
+        }
+
+        function toggleVarianceMode(mode) {
+    const btnS = document.getElementById('btnVarSummary');
+    const btnD = document.getElementById('btnVarDetail');
+    const summaryView = document.getElementById('varSummaryContent');
+    const detailView = document.getElementById('varDetailContent');
+    
+    if (mode === 'summary') {
+        summaryView.classList.remove('hidden-view');
+        detailView.classList.add('hidden-view');
+        // Update Button UI
+        btnS.classList.add('bg-white', 'shadow-sm');
+        btnS.classList.remove('text-slate-500');
+        btnD.classList.remove('bg-white', 'shadow-sm');
+        btnD.classList.add('text-slate-500');
+    } else {
+        summaryView.classList.add('hidden-view');
+        detailView.classList.remove('hidden-view');
+        // Update Button UI
+        btnD.classList.add('bg-white', 'shadow-sm');
+        btnD.classList.remove('text-slate-500');
+        btnS.classList.remove('bg-white', 'shadow-sm');
+        btnS.classList.add('text-slate-500');
+    }
+}
+
+        function openDiagnostic(name, cat) {
+            document.getElementById('diagName').innerText = name;
+            document.getElementById('diagCat').innerText = cat;
+            views.modal.classList.remove('hidden-view');
+        }
+
+        function closeDiagnostic() {
+            views.modal.classList.add('hidden-view');
+        }
+
+        // Populating Item Count List
+        // 1. New Categorized Data Structure
+const inventoryData = {
+    "DRY STORAGE": [
+        { name: "All Purpose Flour - 50lb", id: "SYS-102938", c1: "2", c2: "", c3: "", c4: "", alert: true, qty: "2.00", val: "$49.00" },
+        { name: "Canola Oil - 35lb", id: "SYS-445566", c1: "5", c2: "2", c3: "", c4: "", alert: true, qty: "7.00", val: "$294.70" }
+    ],
+    "WALK-IN COOLER": [
+        { name: "Heavy Cream 36% - 1qt", id: "DAI-1122", c1: "12", c2: "4", c3: "", c4: "", alert: false, qty: "16.00", val: "$87.20" },
+        { name: "Unsalted Butter - 1lb", id: "DAI-5544", c1: "", c2: "", c3: "", c4: "", alert: true, qty: "0.00", val: "$0.00" }
+    ],
+    "FREEZER": [
+        { name: "Beef Patties 4:1 - 10lb", id: "MEAT-001", c1: "4", c2: "", c3: "", c4: "", alert: false, qty: "4.00", val: "$275.60" },
+        { name: "French Fries 3/8 - 30lb", id: "VEG-990", c1: "10", c2: "8", c3: "2", c4: "", alert: true, qty: "20.00", val: "$683.00" },
+        { name: "Chicken Wings - 40lb", id: "MEAT-552", c1: "", c2: "", c3: "", c4: "", alert: true, qty: "0.00", val: "$0.00" }
+    ]
+};
+
+// 2. Updated Render Function (Replaces old loop)
+function renderInventory() {
+    const tbody = document.getElementById('newCountTableBody'); // Ensure this ID matches your HTML
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    for (const [category, items] of Object.entries(inventoryData)) {
+        // Category Header Row
+        const headerRow = document.createElement('tr');
+        headerRow.className = "category-header shadow-sm";
+        headerRow.innerHTML = `
+            <td colspan="8" class="px-4 py-2 bg-[#f1f5f9] border-l-4 border-indigo-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-down text-[10px] text-indigo-500 mr-3"></i>
+                        <span class="text-[11px] font-black text-slate-700 tracking-tight">${category}</span>
+                        <span class="ml-2 text-[9px] font-bold text-slate-400">(${items.length} ITEMS)</span>
+                    </div>
+                    <button class="bg-rose-50 text-rose-500 px-3 py-1 rounded text-[9px] font-bold border border-rose-100 flex items-center">
+                         View ${items.filter(i => i.alert).length} Alerts
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(headerRow);
+
+        // Individual Item Rows
+        items.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = "bg-white border-b border-slate-100 hover:bg-blue-50/20 transition-colors";
+            row.innerHTML = `
+                <td class="px-4 py-3">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 mr-3 flex items-center justify-center border border-slate-200">
+                            <i class="fas fa-box text-slate-400 text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-800">${item.name}</div>
+                            <div class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">${item.id}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-2 py-3 text-center"><input type="text" value="${item.c1}" class="count-input-new"></td>
+                <td class="px-2 py-3 text-center"><input type="text" value="${item.c2}" class="count-input-new"></td>
+                <td class="px-2 py-3 text-center"><input type="text" value="${item.c3}" class="count-input-new"></td>
+                <td class="px-2 py-3 text-center"><input type="text" value="${item.c4}" class="count-input-new"></td>
+                <td class="px-2 py-3 text-center">
+                    ${item.alert ? '<div class="bg-rose-100 w-6 h-6 rounded flex items-center justify-center mx-auto border border-rose-200"><i class="fas fa-exclamation-triangle text-rose-500 text-[10px]"></i></div>' : '-'}
+                </td>
+                <td class="px-2 py-3 text-right text-[11px] font-black text-indigo-600">${item.qty}</td>
+                <td class="px-4 py-3 text-right text-[11px] font-black text-slate-800">${item.val}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+}
+
+// 3. Initialize
+renderInventory();
+
+        const countTbody = document.getElementById('countTableBody');
+        items.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-slate-50 hover:bg-slate-50';
+            row.innerHTML = `
+                <td class="px-5 py-4 flex items-center">
+                    <div class="w-8 h-8 rounded bg-slate-200 mr-3 flex items-center justify-center font-bold text-slate-400 text-[10px]">${item.name.substring(0,2)}</div>
+                    <div><div class="font-bold text-slate-800 uppercase tracking-tighter">${item.name}</div><div class="text-[9px] text-slate-400">${item.sub}</div></div>
+                </td>
+                <td class="px-5 py-4"><input type="text" value="${item.c1}" class="input-count"><span class="unit-label">${item.u1}</span></td>
+                <td class="px-5 py-4"><input type="text" value="${item.c2}" class="input-count"><span class="unit-label">${item.u2}</span></td>
+                <td class="px-5 py-4">${item.c3 === '-' ? '-' : `<input type="text" value="${item.c3}" class="input-count"><span class="unit-label">${item.u3}</span>`}</td>
+                <td class="px-5 py-4 text-center">-</td>
+                <td class="px-5 py-4 text-right pr-6 font-bold text-slate-700 tracking-tight">${item.total}</td>
+            `;
+            countTbody.appendChild(row);
+        });
+
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDiagnostic(); });
+		
+
+// Naya function ADD karein Toggle ke liye
+function toggleTrendView() {
+    const mainView = document.getElementById('diagnosticMainView');
+    const trendView = document.getElementById('trendView');
+    
+    // Switch logic
+    if (trendView.classList.contains('hidden-view')) {
+        trendView.classList.remove('hidden-view'); // Table dikhayega
+        mainView.classList.add('hidden-view');    // Cards hide kar dega
+    } else {
+        trendView.classList.add('hidden-view');
+        mainView.classList.remove('hidden-view');
+    }
+}
+
+
+    </script>
+</body>
+</html>

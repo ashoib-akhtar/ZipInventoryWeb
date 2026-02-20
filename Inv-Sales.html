@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Operations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f8fafc;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        /* Sidebar hover expansion logic */
+        aside {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 64px;
+            z-index: 50;
+        }
+        aside:hover { width: 260px; }
+
+        .menu-text {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+            display: none;
+        }
+        aside:hover .menu-text { opacity: 1; display: inline; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            height: 44px;
+            padding: 0 20px;
+            color: #94a3b8;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        /* Table Styling */
+        .table-header-cell {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Tools Dropdown Tip */
+        .dropdown-tip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 12px;
+            width: 10px;
+            height: 10px;
+            background: white;
+            transform: rotate(45deg);
+            border-left: 1px solid #e2e8f0;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .hidden-rows { display: none; }
+        .input-div {
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            padding: 4px 8px;
+            border-radius: 2px;
+            text-align: right;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            min-width: 80px;
+        }
+
+        .view-container { display: none; flex-direction: column; height: 100%; }
+        .view-active { display: flex; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- Hover Sidebar -->
+    <aside class="h-screen bg-[#0f172a] shadow-xl flex flex-col flex-shrink-0">
+        <div class="h-14 flex items-center px-4 bg-[#1e293b]">
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center flex-shrink-0 shadow-lg">
+                <i data-lucide="layout-grid" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider uppercase">Menu</span>
+        </div>
+
+        <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar mt-2">
+            <a href="index.html" class="menu-item"><i data-lucide="home" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Dashboard</span></a>
+            <a href="Inv-Invoice.html" class="menu-item"><i data-lucide="file-text" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Invoices</span></a>
+            <a href="Inv-CreditMemo.html" class="menu-item"><i data-lucide="wallet" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Credit Memo</span></a>
+            <a href="Inv-Transfers.html" class="menu-item"><i data-lucide="repeat" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Transfer</span></a>
+            <a href="Inv-Inventory.html" class="menu-item"><i data-lucide="clipboard-check" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Inventory</span></a>
+            <a href="#" id="nav-actual" class="menu-item active" onclick="switchView('actual')"><i data-lucide="pie-chart" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Actual Sales</span></a>
+            <a href="#" id="nav-forecast" class="menu-item" onclick="switchView('forecast')"><i data-lucide="trending-up" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Forecasted Sales</span></a>
+            <a href="Inv-MenuMix.html" class="menu-item"><i data-lucide="utensils" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Menu Mix</span></a>
+            <a href="Inv-OnHand.html" class="menu-item"><i data-lucide="package" class="w-5"></i><span class="menu-text ml-4 text-[13px]">On Hand</span></a>
+            <a href="Inv-Waste.html" class="menu-item"><i data-lucide="users" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Employees</span></a>
+            <a href="Inv-Waste.html" class="menu-item"><i data-lucide="trash-2" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Waste</span></a>
+            <a href="#" class="menu-item"><i data-lucide="truck" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Supplier Item Price List</span></a>
+            
+            <div class="mt-auto border-t border-slate-800/50 pt-2 mb-4">
+                <a href="Inv-Reports.html" class="menu-item flex justify-between w-full">
+                    <div class="flex items-center"><i data-lucide="bar-chart-2" class="w-5"></i><span class="menu-text ml-4 text-[13px]">Reports</span></div>
+                    <i data-lucide="chevron-right" class="w-3 h-3 menu-text opacity-50"></i>
+                </a>
+                
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Top Nav (Shared) -->
+        <header class="h-14 bg-[#0f172a] text-white flex items-center justify-between px-6 border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center space-x-6 text-[12px]">
+                <div class="flex items-center space-x-2 cursor-pointer group"><span class="font-semibold uppercase text-slate-200">My Apps</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i></div>
+                <div class="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded cursor-pointer border border-transparent">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i><span class="font-medium text-[12px]">Costa Mesa</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-2 text-xs font-semibold"><i data-lucide="cloud-sun" class="w-4 h-4 text-blue-400"></i><span class="text-sm">-8°C</span></div>
+                    <div class="flex items-center space-x-2 text-xs border-l border-slate-700 pl-6">
+                        <span class="text-slate-200 font-bold text-sm">02:37<sup class="text-[8px] ml-0.5">P</sup></span>
+                        <span class="text-slate-500 text-[10px] font-bold tracking-tight uppercase">America/Toronto</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-slate-800 px-3 py-1 rounded border border-slate-700 cursor-pointer flex items-center">
+                        <i data-lucide="store" class="w-3.5 h-3.5 text-blue-400 mr-2"></i><span class="font-bold text-[11px] mr-2">814</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                    </div>
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-400 cursor-pointer hover:text-white"></i>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" class="w-8 h-8 rounded-full ring-2 ring-slate-700 p-0.5 bg-slate-600">
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: ACTUAL SALES -->
+        <div id="view-actual" class="view-container view-active">
+            <!-- Header Row with Line -->
+            <div class="px-6 py-4 flex items-center space-x-2 border-b border-slate-200/60">
+                <i data-lucide="pie-chart" class="w-5 h-5 text-blue-600"></i>
+                <h1 class="text-sm font-bold text-slate-700">Actual Sales</h1>
+            </div>
+
+            <!-- Action Bar Row (Calendar Left, Sales Center, Wrench Right) -->
+            <div class="px-6 py-3 flex items-center justify-between border-b border-slate-100 mb-2">
+                <!-- Left: Calendar -->
+                <div class="flex items-center border border-slate-200 rounded overflow-hidden">
+                    <button class="p-2 bg-white hover:bg-slate-50 border-r border-slate-200"><i data-lucide="chevron-left" class="w-3.5 h-3.5 text-slate-500"></i></button>
+                    <div class="px-4 py-1.5 bg-white flex items-center space-x-4 cursor-pointer">
+                        <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                        <span class="text-[12px] font-bold text-[#1e293b]">02/03/2026</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 ml-2"></i>
+                    </div>
+                    <button class="p-2 bg-white hover:bg-slate-50 border-l border-slate-200"><i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i></button>
+                </div>
+
+                <!-- Center: Sales Pill -->
+                <div class="flex items-center bg-white border border-slate-200 rounded px-6 py-1.5 cursor-pointer shadow-sm">
+                    <span class="text-[12px] font-bold mr-8">Sales</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+                <!-- Right: Tools/Wrench -->
+                <div class="relative"><button class="wrench-trigger flex items-center space-x-1.5 border border-slate-200 rounded-full px-3 py-1 hover:bg-slate-50 shadow-sm"><i data-lucide="wrench" class="w-4 h-4 text-slate-600"></i><i data-lucide="chevron-down" class="w-3 h-3 text-slate-600"></i></button></div>
+            </div>
+
+            <div class="px-4 flex-1 overflow-auto custom-scrollbar">
+                <div class="border border-slate-200 rounded-md overflow-hidden bg-white shadow-sm">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="table-header-cell w-40 text-left">Actuals</th>
+                                <th class="table-header-cell">TUE 03</th><th class="table-header-cell">WED 04</th><th class="table-header-cell">THU 05</th><th class="table-header-cell">FRI 06</th><th class="table-header-cell">SAT 07</th><th class="table-header-cell">SUN 08</th><th class="table-header-cell">MON 09</th>
+                                <th class="table-header-cell w-32 bg-blue-50/20 text-blue-600">Weekly Total</th>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-200">
+                                <td class="p-2 text-[11px] font-bold text-slate-500 pl-6">Sales</td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 5283.93 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 4995.69 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 7337.27 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 8690.57 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 5622.21 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 5944.79 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[11px] font-bold text-blue-600">$ 1568.03 <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>
+                                <td class="p-2 text-right text-[12px] font-black text-blue-600 bg-blue-50/40">$ 39,442.49</td>
+                            </tr>
+                        </thead>
+                        <tbody id="actual-rows">
+                            <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <td colspan="9" class="p-2"><div class="toggle-actuals flex items-center text-[11px] font-bold text-slate-400 uppercase cursor-pointer pl-4"><i data-lucide="minus" class="w-3.5 h-3.5 mr-2"></i><span>Hide Hourly Actuals</span></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: FORECASTED SALES -->
+        <div id="view-forecast" class="view-container">
+            <!-- Header Row with Line -->
+            <div class="px-6 py-4 flex items-center space-x-2 border-b border-slate-200/60">
+                <i data-lucide="trending-up" class="w-5 h-5 text-blue-600"></i>
+                <h1 class="text-sm font-bold text-slate-700">Forecasted Sales</h1>
+            </div>
+
+            <!-- Action Bar Row (Calendar Left, Sales Center, Wrench Right) -->
+            <div class="px-6 py-3 flex items-center justify-between border-b border-slate-100 mb-2">
+                <div class="flex items-center border border-slate-200 rounded overflow-hidden">
+                    <button class="p-2 bg-white border-r border-slate-200"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                    <div class="px-4 py-1.5 bg-white flex items-center space-x-4 cursor-pointer"><i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i><span class="text-[12px] font-bold text-[#1e293b]">02/03/2026</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 ml-2"></i></div>
+                    <button class="p-2 bg-white border-l border-slate-200"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+                </div>
+                <div class="flex items-center bg-white border border-slate-200 rounded px-6 py-1.5 cursor-pointer shadow-sm"><span class="text-[12px] font-bold mr-8 text-[#1e293b]">Sales</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></div>
+                <div class="relative"><button class="wrench-trigger flex items-center space-x-1.5 border border-slate-200 rounded-full px-3 py-1 hover:bg-slate-50 shadow-sm"><i data-lucide="wrench" class="w-4 h-4 text-slate-600"></i><i data-lucide="chevron-down" class="w-3 h-3 text-slate-600"></i></button></div>
+            </div>
+
+            <div class="px-4 flex-1 overflow-auto custom-scrollbar">
+                <div class="border border-slate-200 rounded-md overflow-hidden bg-white shadow-sm mb-4">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="table-header-cell w-40 text-left">Forecast</th>
+                                <th class="table-header-cell">TUE 03</th><th class="table-header-cell">WED 04</th><th class="table-header-cell">THU 05</th><th class="table-header-cell">FRI 06</th><th class="table-header-cell">SAT 07</th><th class="table-header-cell">SUN 08</th><th class="table-header-cell">MON 09</th>
+                                <th class="table-header-cell w-32 bg-blue-50/20 text-blue-600">Weekly Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Weather -->
+                            <tr class="border-b border-slate-100">
+                                <td class="p-3 text-[11px] font-bold text-slate-500 pl-6">Weather</td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud-snow" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-6°C</span><span class="text-[8px] text-slate-400">Snow</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-9°C</span><span class="text-[8px] text-slate-400">Clouds</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud-snow" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-5°C</span><span class="text-[8px] text-slate-400">Snow</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud-snow" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-3°C</span><span class="text-[8px] text-slate-400">Snow</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-17°C</span><span class="text-[8px] text-slate-400">Clouds</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-16°C</span><span class="text-[8px] text-slate-400">Clouds</span></div></td>
+                                <td class="p-3 text-center"><div class="flex flex-col items-center"><i data-lucide="cloud" class="w-5 h-5 text-slate-400"></i><span class="text-[12px] font-bold">-8°C</span><span class="text-[8px] text-slate-400">Clouds</span></div></td>
+                                <td class="p-3 text-center text-[12px] font-bold text-slate-400">-</td>
+                            </tr>
+                            <!-- My Forecast -->
+                            <tr class="border-b border-slate-100">
+                                <td class="p-2 text-[11px] font-bold text-slate-500 pl-6">My Forecast</td>
+                                <script>
+                                    const forecastVals = [5200, 4500, 6800, 7600, 7100, 5400, 4400];
+                                    forecastVals.forEach(v => document.write(`<td class="p-2 text-right text-[11px] font-bold text-blue-600">$ ${v.toFixed(2)} <i data-lucide="pencil" class="w-2 h-2 opacity-40"></i></td>`));
+                                </script>
+                                <td class="p-2 text-right text-[12px] font-black text-blue-600 bg-blue-50/40">$ 41,000.00</td>
+                            </tr>
+                            <!-- Current Week Actual -->
+                            <tr class="border-b border-slate-100 bg-slate-50/30">
+                                <td class="p-2 text-[11px] font-bold text-slate-500 pl-6">Current Week Actual Sales</td>
+                                <script>
+                                    const curWeekActualSummary = [5283.93, 4995.69, 7337.27, 8690.57, 5622.21, 5944.79, 1568.03];
+                                    curWeekActualSummary.forEach(v => document.write(`<td class="p-2 text-right text-[11px] font-bold text-slate-600">$ ${v.toFixed(2)}</td>`));
+                                </script>
+                                <td class="p-2 text-right text-[12px] font-bold text-slate-800">$ 39,442.49</td>
+                            </tr>
+                            <!-- Last 4 Weeks Actual -->
+                            <tr class="border-b border-slate-100">
+                                <td class="p-2 text-[11px] font-bold text-slate-500 pl-6">Last 4 Weeks Actual Sales</td>
+                                <script>
+                                    const last4WeeksSummary = [3372.77, 5712.95, 6302.48, 8657.51, 6858.87, 4025.22, 4027.03];
+                                    last4WeeksSummary.forEach(v => document.write(`<td class="p-2 text-right text-[11px] font-bold text-slate-600">$ ${v.toFixed(2)}</td>`));
+                                </script>
+                                <td class="p-2 text-right text-[12px] font-bold text-slate-800">$ 38,956.83</td>
+                            </tr>
+                        </tbody>
+                        <tbody id="forecast-rows">
+                            <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <td colspan="8" class="p-2"><div class="toggle-forecast flex items-center text-[11px] font-bold text-slate-400 uppercase cursor-pointer pl-4"><i data-lucide="minus" class="w-3.5 h-3.5 mr-2"></i><span>Hide Hourly Forecast</span></div></td>
+                                <td class="p-2 text-right"><button class="bg-[#5c7cfa] text-white text-[10px] font-bold py-1 px-4 rounded shadow-sm flex items-center ml-auto"><i data-lucide="edit-3" class="w-3 h-3 mr-2"></i> Update</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shared Wrench Dropdown -->
+        <div id="wrenchDropdown" class="hidden absolute w-44 bg-white border border-slate-200 rounded-md shadow-xl z-[100] dropdown-tip">
+            <div class="py-1">
+                <a href="#" class="flex items-center px-4 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i data-lucide="file-text" class="w-3.5 h-3.5 mr-3 text-slate-400"></i> Import CSV</a>
+                <a href="#" class="flex items-center px-4 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"><i data-lucide="file-text" class="w-3.5 h-3.5 mr-3 text-slate-400"></i> Export CSV</a>
+            </div>
+        </div>
+
+        <footer class="h-10 border-t border-slate-100 bg-slate-50 px-6 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase flex-shrink-0">
+            <div class="flex items-center space-x-6"><div class="flex items-center cursor-pointer hover:text-blue-500"><i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1"></i> Help</div></div>
+            <div>v1.0.4</div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // View Switching
+        function switchView(view) {
+            document.getElementById('view-actual').classList.remove('view-active');
+            document.getElementById('view-forecast').classList.remove('view-active');
+            document.getElementById('nav-actual').classList.remove('active');
+            document.getElementById('nav-forecast').classList.remove('active');
+            
+            document.getElementById('view-' + view).classList.add('view-active');
+            document.getElementById('nav-' + view).classList.add('active');
+            lucide.createIcons();
+        }
+
+        // Shared Tool Dropdown Logic
+        const wrenchTriggers = document.querySelectorAll('.wrench-trigger');
+        const wrenchDropdown = document.getElementById('wrenchDropdown');
+        
+        wrenchTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = btn.getBoundingClientRect();
+                wrenchDropdown.style.top = (rect.bottom + 8) + 'px';
+                wrenchDropdown.style.left = (rect.right - 176) + 'px';
+                wrenchDropdown.classList.toggle('hidden');
+            });
+        });
+
+        document.addEventListener('click', () => wrenchDropdown.classList.add('hidden'));
+
+        // Hourly Sales Data (Actual)
+        const hourlyActualData = [
+            { t: "4:00a-5:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "5:00a-6:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "6:00a-7:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "7:00a-8:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "8:00a-9:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "9:00a-10:00a", v: [0,0,16.92,0,0,0,0], tot: "16.92" },
+            { t: "10:00a-11:00a", v: [863.20, 46.24, 658.95, 45.50, 0, 0, 30.45], tot: "1,644.34" },
+            { t: "11:00a-12:00p", v: [410.08, 194.11, 605.74, 132.37, 145.08, 217.46, 186.46], tot: "1,891.30" },
+            { t: "12:00p-1:00p", v: [421.10, 543.96, 769.21, 568.66, 305.08, 399.63, 421.61], tot: "3,429.25" },
+            { t: "1:00p-2:00p", v: [154.69, 386.14, 228.62, 233.25, 321.79, 255.21, 777.76], tot: "2,357.46" },
+            { t: "2:00p-3:00p", v: [148.52, 134.88, 112.34, 273.86, 221.25, 360.72, 151.75], tot: "1,403.32" },
+            { t: "3:00p-4:00p", v: [216.07, 338.81, 426.16, 410.20, 400.31, 285.06, 0], tot: "2,076.61" },
+            { t: "4:00p-5:00p", v: [573.61, 704.41, 881.29, 1399.18, 934.60, 953.04, 0], tot: "5,446.13" },
+            { t: "5:00p-6:00p", v: [859.99, 794.22, 1254.17, 2173.65, 1073.27, 1477.13, 0], tot: "7,632.43" },
+            { t: "6:00p-7:00p", v: [557.00, 884.19, 1053.92, 1334.34, 780.39, 990.11, 0], tot: "5,599.95" },
+            { t: "7:00p-8:00p", v: [398.30, 411.83, 505.49, 742.82, 492.43, 571.87, 0], tot: "3,122.74" },
+            { t: "8:00p-9:00p", v: [286.20, 159.33, 319.30, 620.42, 381.89, 183.55, 0], tot: "1,950.69" },
+            { t: "9:00p-10:00p", v: [219.24, 143.42, 270.62, 205.78, 138.96, 48.54, 0], tot: "1,026.56" },
+            { t: "10:00p-11:00p", v: [101.29, 207.91, 87.38, 329.08, 148.16, 159.51, 0], tot: "1,033.33" },
+            { t: "11:00p-12:00a", v: [74.64, 46.24, 147.16, 181.50, 122.75, 42.96, 0], tot: "615.25" },
+            { t: "12:00a-1:00a", v: [0, 0, 0, 39.96, 156.25, 0, 0], tot: "196.21" }
+        ];
+
+        // Hourly Forecast Data
+        const hourlyForecastData = [
+            { t: "4:00a-5:00a", v: [263.29, 0, 0, 0, 0, 0, 0], tot: "263.29" },
+            { t: "5:00a-6:00a", v: [263.29, 0, 0, 0, 0, 0, 0], tot: "263.29" },
+            { t: "6:00a-7:00a", v: [263.29, 0, 0, 0, 0, 0, 0], tot: "263.29" },
+            { t: "7:00a-8:00a", v: [263.29, 0, 0, 0, 0, 0, 0], tot: "263.29" },
+            { t: "8:00a-9:00a", v: [263.29, 0, 0, 0, 0, 0, 0], tot: "263.29" },
+            { t: "9:00a-10:00a", v: [263.29, 0, 0, 2.03, 0.36, 5.29, 0], tot: "270.97" },
+            { t: "10:00a-11:00a", v: [263.29, 146.28, 265.42, 124.09, 8.06, 1.63, 30.72], tot: "839.48" },
+            { t: "11:00a-12:00p", v: [263.29, 209.34, 476.15, 353.23, 209.48, 217.00, 232.34], tot: "1,960.82" },
+            { t: "12:00p-1:00p", v: [263.29, 348.12, 712.48, 651.90, 381.92, 403.84, 572.77], tot: "3,334.33" },
+            { t: "1:00p-2:00p", v: [263.29, 193.07, 263.44, 289.59, 420.93, 381.79, 189.23], tot: "2,001.34" },
+            { t: "2:00p-3:00p", v: [263.29, 226.51, 197.16, 268.67, 321.15, 431.15, 187.79], tot: "1,895.72" },
+            { t: "3:00p-4:00p", v: [263.29, 381.96, 456.61, 568.69, 539.07, 440.15, 324.91], tot: "2,374.68" },
+            { t: "4:00p-5:00p", v: [263.29, 698.60, 915.84, 1188.40, 873.37, 761.08, 524.37], tot: "5,224.95" },
+            { t: "5:00p-6:00p", v: [263.29, 791.37, 1377.44, 1488.08, 1423.00, 915.16, 736.93], tot: "6,995.28" },
+            { t: "6:00p-7:00p", v: [263.29, 634.23, 902.59, 1122.22, 1189.70, 845.72, 613.54], tot: "5,571.30" },
+            { t: "7:00p-8:00p", v: [263.29, 360.30, 571.85, 562.33, 696.02, 372.00, 368.27], tot: "3,194.06" },
+            { t: "8:00p-9:00p", v: [263.29, 197.93, 311.63, 403.47, 395.07, 223.62, 236.87], tot: "2,031.89" },
+            { t: "9:00p-10:00p", v: [263.29, 138.06, 185.64, 282.52, 273.98, 156.49, 197.19], tot: "1,497.16" },
+            { t: "10:00p-11:00p", v: [263.29, 113.31, 71.00, 142.81, 222.56, 172.35, 117.03], tot: "1,102.35" },
+            { t: "11:00p-12:00a", v: [197.47, 60.92, 92.76, 151.97, 145.32, 72.74, 68.03], tot: "789.21" },
+            { t: "12:00a-1:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "1:00a-2:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "2:00a-3:00a", v: [0,0,0,0,0,0,0], tot: "0.00" },
+            { t: "3:00a-4:00a", v: [0,0,0,0,0,0,0], tot: "0.00" }
+        ];
+
+        function renderRows(targetId, data, rowClass) {
+            const body = document.getElementById(targetId);
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = `${rowClass} border-b border-slate-50 hover:bg-slate-50 transition-colors`;
+                tr.innerHTML = `
+                    <td class="p-2 pl-8 text-[11px] font-bold text-slate-400">${row.t}</td>
+                    ${row.v.map(val => `<td class="p-1 px-2"><div class="input-div">$ ${val === 0 ? '0' : val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '')}</div></td>`).join('')}
+                    <td class="p-2 text-right text-[11px] font-bold text-slate-700 bg-slate-50/30">$ ${row.tot}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        renderRows('actual-rows', hourlyActualData, 'hourly-actual');
+        renderRows('forecast-rows', hourlyForecastData, 'hourly-forecast');
+
+        // Toggle Logic
+        function setupToggle(btnClass, rowClass, hideTxt, showTxt) {
+            const btn = document.querySelector(btnClass);
+            let hidden = false;
+            btn.addEventListener('click', () => {
+                hidden = !hidden;
+                document.querySelectorAll('.' + rowClass).forEach(r => r.classList.toggle('hidden-rows'));
+                btn.querySelector('i').setAttribute('data-lucide', hidden ? 'plus' : 'minus');
+                btn.querySelector('span').innerText = hidden ? showTxt : hideTxt;
+                lucide.createIcons();
+            });
+        }
+
+        setupToggle('.toggle-actuals', 'hourly-actual', 'Hide Hourly Actuals', 'Show Hourly Actuals');
+        setupToggle('.toggle-forecast', 'hourly-forecast', 'Hide Hourly Forecast', 'Show Hourly Forecast');
+    </script>
+</body>
+</html>

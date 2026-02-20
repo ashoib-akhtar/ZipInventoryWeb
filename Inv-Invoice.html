@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices | Restaurant Operations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f8fafc;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        /* Sidebar hover expansion logic */
+        aside {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 64px;
+            z-index: 50;
+        }
+        aside:hover { width: 260px; }
+
+        .menu-text {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+            display: none;
+        }
+        aside:hover .menu-text { opacity: 1; display: inline; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            height: 44px;
+            padding: 0 20px;
+            color: #94a3b8;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-left-color: #3b82f6;
+        }
+
+        /* Table Styling */
+        .invoice-table th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            color: #64748b;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 16px;
+            text-align: left;
+            white-space: nowrap;
+            background: white;
+        }
+        .invoice-table td {
+            font-size: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        .data-row:hover { background-color: #f8fafc; }
+
+        /* Status Badges */
+        .status-finalized { color: #10b981; font-weight: 600; }
+        .warning-badge {
+            background-color: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        #filterDropdown { transform-origin: top; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hidden-dropdown { opacity: 0; transform: scale(0.95) translateY(-10px); pointer-events: none; }
+
+        .custom-checkbox {
+            appearance: none; width: 14px; height: 14px; border: 2px solid #e2e8f0;
+            border-radius: 50%; cursor: pointer; position: relative; background: white; transition: all 0.2s;
+        }
+        .custom-checkbox:checked { background-color: #2563eb; border-color: #2563eb; }
+        .custom-checkbox:checked::after {
+            content: '✓'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); color: white; font-size: 9px; font-weight: bold;
+        }
+
+        .view-container { display: none; 
+    flex-direction: column; 
+    height: calc(100vh - 56px); /* Top header ki height minus ki hai */
+    width: 100%; }
+        .view-active { display: flex ! source; }
+		
+.view-active { display: flex; }
+
+/* Table container ko flexible banane ke liye */
+#itemsTableView, #categoryTableView {
+    flex: 1 1 0%;
+    overflow-y: auto;
+    min-height: 0;
+    background-color: white;
+}
+
+.toggle-btn-active { @apply px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700 transition-all; }
+.toggle-btn-inactive { @apply px-5 py-1 text-[10px] font-bold rounded-full text-slate-400 transition-all; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- Hover Sidebar -->
+    <aside class="h-screen bg-[#0f172a] shadow-xl flex flex-col flex-shrink-0">
+        <div class="h-14 flex items-center px-4 bg-[#1e293b]">
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center flex-shrink-0">
+                <i data-lucide="layout-grid" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider uppercase"></span>
+        </div>
+
+        <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar mt-2">
+    <a href="index.html" class="menu-item" onclick="switchMainView('dashboard')">
+        <i data-lucide="home" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Dashboard</span>
+    </a>
+
+    <a href="#" id="navInvoices" class="menu-item active" onclick="switchMainView('invoices')">
+        <i data-lucide="file-text" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Invoices</span>
+    </a>
+
+    <a href="Inv-CreditMemo.html" id="navCreditMemo" class="menu-item" onclick="switchMainView('creditMemo')">
+        <i data-lucide="wallet" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Credit Memo</span>
+    </a>
+
+    <a href="Inv-Transfers.html" class="menu-item">
+        <i data-lucide="repeat" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Transfer</span>
+    </a>
+
+    <a href="Inv-Inventory.html" class="menu-item">
+        <i data-lucide="clipboard-check" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Inventory</span>
+    </a>
+
+    <a href="Inv-Sales.html" class="menu-item">
+        <i data-lucide="pie-chart" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Actual Sales</span>
+    </a>
+
+    <a href="Inv-Sales.html" class="menu-item">
+        <i data-lucide="trending-up" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Forecasted Sales</span>
+    </a>
+
+    <a href="Inv-MenuMix.html" class="menu-item">
+        <i data-lucide="utensils" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Menu Mix</span>
+    </a>
+
+    <a href="Inv-OnHand.html" class="menu-item">
+        <i data-lucide="package" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">On Hand</span>
+    </a>
+    
+    <a href="#" class="menu-item">
+        <i data-lucide="users" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Employees</span>
+    </a>
+
+    <a href="Inv-Waste.html" class="menu-item">
+        <i data-lucide="trash-2" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Waste</span>
+    </a>
+
+    <a href="#" class="menu-item">
+        <i data-lucide="truck" class="w-5"></i>
+        <span class="menu-text ml-4 text-[13px]">Supplier Item Price List</span>
+    </a>
+    
+    <div class="mt-auto border-t border-slate-800/50 pt-2 mb-4">
+        <a href="Inv-Reports.html" class="menu-item">
+            <i data-lucide="bar-chart-2" class="w-5"></i>
+            <span class="menu-text ml-4 text-[13px]">Reports</span>
+        </a>
+
+        
+    </div>
+</nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Top Nav (Primary) -->
+        <header class="h-14 bg-[#0f172a] text-white flex items-center justify-between px-6 border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center space-x-6 text-[12px]">
+                <div class="flex items-center space-x-2"><span class="font-semibold uppercase text-slate-200">My Apps</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i></div>
+                <div class="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded cursor-pointer">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i><span class="font-medium">Costa Mesa</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-xs font-semibold">
+                        <i data-lucide="cloud-sun" class="w-4 h-4 text-yellow-400"></i><span>09:20<sup class="text-[8px] opacity-70">A</sup></span>
+                    </div>
+                    <span class="text-slate-500 text-[9px] font-bold uppercase tracking-widest">America/Los Angeles</span>
+                </div>
+                <div class="flex items-center space-x-3 bg-slate-800 px-3 py-1 rounded border border-slate-700 cursor-pointer">
+                    <i data-lucide="building-2" class="w-3 h-3 text-blue-400"></i><span class="font-bold text-[10px]">CORPORATE</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </div>
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full ring-2 ring-slate-700 p-0.5 bg-slate-600">
+            </div>
+        </header>
+
+        <!-- VIEW 1: INVOICES LIST -->
+        <div id="listView" class="view-container view-active">
+            <div class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm">
+                <div class="flex-1 flex items-center space-x-4">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-slate-400"></i>
+                    <h1 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Invoices</h1>
+                    <div class="flex items-center space-x-2 ml-4 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-white transition-colors">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span class="text-[11px] font-bold text-slate-600">01/10/2026 - 02/09/2026</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex justify-center">
+                    <div class="relative flex items-center">
+                        <div id="filterToggle" class="flex items-center justify-center space-x-2 bg-white border border-slate-200 rounded-full px-6 py-1.5 cursor-pointer hover:shadow-sm transition-all">
+                            <span class="text-[11px] font-bold text-slate-500">Filters</span>
+                            <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
+                        </div>
+                        <div id="filterDropdown" class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[320px] bg-white border border-slate-200 rounded-xl shadow-2xl z-[60] p-4 hidden-dropdown">
+                            <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-slate-200 rotate-45"></div>
+                            <button id="closeFilter" class="absolute top-1.5 right-1.5 text-slate-300 hover:text-slate-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-3">
+                                    <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Suppliers</h3>
+                                    <div class="space-y-2 pt-1">
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="GFS" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">GFS</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="PEPSI" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">PEPSI</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="URS" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">URS</span></label>
+                                    </div>
+                                </div>
+                                <div class="space-y-3 relative">
+                                    <div class="absolute -left-2 top-0 bottom-0 w-px bg-slate-100"></div>
+                                    <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Status</h3>
+                                    <div class="space-y-2 pt-1">
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Pending" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Pending</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Received" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Received</span></label>
+                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Finalized</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-3 border-t border-slate-100 flex justify-between items-center">
+                                <button id="clearFilters" class="px-5 py-1.5 bg-rose-400 hover:bg-rose-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Clear</button>
+                                <button id="applyFilters" class="px-6 py-1.5 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex items-center justify-end space-x-3">
+                    <div class="p-2 text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="wrench" class="w-4 h-4"></i></div>
+                    <button class="bg-[#4dd0e1] hover:bg-[#26c6da] text-white px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-sm transition-colors">Add Invoice</button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto bg-white custom-scrollbar">
+                <table class="w-full invoice-table border-collapse">
+                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                        <tr>
+                            <th>Status <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Invoice No. <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Supplier Name <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Received On <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Finalized On <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th>Delivery Date <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th class="text-right">Credit Amount <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th class="text-right">Total Amount <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                            <th class="text-center">Action(s) <i data-lucide="search" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="invoiceListBody">
+                        <!-- Rows populated by Script -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 2: INVOICE EDIT -->
+       <div id="editView" class="view-container flex flex-col">
+    <div class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm flex-shrink-0">
+        <div class="flex-1 flex items-center space-x-4">
+            <div class="bg-[#8b5cf6] p-1.5 rounded-lg text-white"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+            <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Invoice</h2>
+        </div>
+        <div class="flex-1 flex justify-center">
+            <div class="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200">
+                <button id="toggleItems" class="px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700 transition-all">View By Items</button>
+                <button id="toggleCategory" class="px-5 py-1 text-[10px] font-bold rounded-full text-slate-400 transition-all">View By Category</button>
+            </div>
+        </div>
+        <div class="flex-1 flex items-center justify-end space-x-2">
+            <button class="bg-[#22d3ee] text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5"></i> <span>Un-Finalize</span></button>
+            <button onclick="closeInvoiceEdit()" class="bg-rose-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase flex items-center space-x-2"><i data-lucide="x" class="w-3.5 h-3.5"></i> <span>Close</span></button>
+        </div>
+    </div>
+
+    <div class="bg-slate-50/50 px-6 py-4 border-b border-slate-200 flex-shrink-0">
+        <div class="grid grid-cols-4 gap-4 max-w-[1600px]">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Supplier Name</p>
+                    <p class="text-lg font-bold text-blue-600 mt-1" id="editSupplier">GFS</p>
+                </div>
+                <div class="flex justify-between items-end">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">P.O. Number</p>
+                    <span class="bg-slate-50 px-2 py-1 rounded text-[10px] font-bold text-slate-700 border border-slate-200">0000228851</span>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
+                
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Delivery Date</p>
+                    <p class="text-lg font-bold text-blue-600 mt-1">01/10/2026</p>
+              
+                <div class="flex justify-between items-end">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Received On</p>
+                    <span class="bg-slate-50 px-2 py-1 rounded text-[10px] font-bold text-slate-700 border border-slate-200">01/10/2026</span>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Invoice No.</p>
+                     <p class="text-lg font-bold text-blue-600 mt-1" id="editInvNo">#269829</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <p class="text-[11px] font-bold text-emerald-500">Finalized</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-4 rounded-2xl shadow-md flex flex-col justify-between h-28 text-white relative overflow-hidden">
+    <div class="flex justify-between items-start relative z-10">
+        <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wider">Total Items</p>
+        
+        <label class="cursor-pointer hover:bg-white/20 p-1.5 rounded-full transition-all border border-white/10 bg-white/5" title="Attach Files">
+            <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+            <input type="file" class="hidden" multiple onchange="console.log('Files attached')">
+        </label>
+    </div>
+    
+    <div class="relative z-10">
+        <p class="text-3xl font-black leading-none">09</p>
+    </div>
+    
+    <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full"></div>
+</div>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col min-h-0 relative">
+        <div id="itemsTableView" class="flex-1 overflow-auto">
+            <table class="w-full invoice-table border-collapse">
+                <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                    <tr>
+                        <th class="w-24">SKU No.</th>
+                        <th>Supplier Item Name</th>
+                        <th>Category</th>
+                        <th class="text-right">Price</th>
+                        <th>Case Description</th>
+                        <th class="text-center">Order Qty.</th>
+                        <th class="text-center">Shipped Qty.</th>
+                        <th class="text-center">Received Qty.</th>
+                        <th class="text-right">Item Price</th>
+                        <th class="text-right">Item Tax</th>
+                        <th class="text-right">Total Price</th>
+                    </tr>
+                </thead>
+                <tbody id="editItemBody"></tbody>
+            </table>
+        </div>
+        <div id="categoryTableView" class="flex-1 overflow-auto hidden">
+            <table class="w-full invoice-table border-collapse">
+                <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                    <tr>
+                        <th class="w-32">GL Code</th>
+                        <th>Category Name</th>
+                        <th>Major Category Name</th>
+                        <th class="text-center">Total Item</th>
+                        <th class="text-right">Item Price($)</th>
+                        <th class="text-right">Item Tax($)</th>
+                        <th class="text-right">Total Price($)</th>
+                    </tr>
+                </thead>
+                <tbody id="editCategoryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-slate-100/50 p-4 flex justify-end flex-shrink-0 border-t border-slate-200">
+        <div class="w-80 space-y-2 pr-10">
+            <div class="flex justify-between text-[12px] font-bold text-slate-500"><span>Sub Total Amount:</span><span class="text-slate-700">$ 6,771.00</span></div>
+            <div class="flex justify-between text-[12px] font-bold text-slate-500"><span>Total Tax:</span><span class="text-slate-700">$ 85.25</span></div>
+            <div class="flex justify-between text-[15px] font-black text-slate-800 pt-2 border-t border-slate-300"><span>Total Amount:</span><span>$ 6,856.25</span></div>
+        </div>
+    </div>
+</div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // --- Mock Data ---
+        const invoiceListData = [
+            { id: '269829', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 134.00' },
+            { id: '9031045310', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 6,856.25', alert: 7 },
+            { id: '269851', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 72.00' },
+            { id: '47113910', status: 'Finalized', supplier: 'PEPSI', received: '01/13/2026', finalized: '01/13/2026', delivery: '01/12/2026', credit: '$ 0.00', total: '$ 798.44' },
+            { id: '9031160601', status: 'Finalized', supplier: 'GFS', received: '01/14/2026', finalized: '01/14/2026', delivery: '01/14/2026', credit: '$ 0.00', total: '$ 7,001.70', alert: 7 },
+            { id: '270120', status: 'Finalized', supplier: 'GFS', received: '01/14/2026', finalized: '01/14/2026', delivery: '01/14/2026', credit: '$ 0.00', total: '$ 108.00' },
+            { id: '9031296534', status: 'Finalized', supplier: 'GFS', received: '01/17/2026', finalized: '01/18/2026', delivery: '01/17/2026', credit: '$ 0.00', total: '$ 7,576.30', alert: 8 },
+            { id: '270476', status: 'Finalized', supplier: 'GFS', received: '01/19/2026', finalized: '01/19/2026', delivery: '01/19/2026', credit: '$ 0.00', total: '$ 38.50' },
+            { id: '4919906', status: 'Finalized', supplier: 'PEPSI', received: '01/19/2026', finalized: '01/19/2026', delivery: '01/19/2026', credit: '$ 0.00', total: '$ 823.39' },
+            { id: '270581', status: 'Finalized', supplier: 'GFS', received: '01/20/2026', finalized: '01/23/2026', delivery: '01/20/2026', credit: '$ 0.00', total: '$ 72.00' },
+            { id: '9031404612', status: 'Finalized', supplier: 'GFS', received: '01/21/2026', finalized: '01/22/2026', delivery: '01/21/2026', credit: '$ 351.50', total: '$ 7,685.68', alert: 6 },
+            { id: '270640', status: 'Finalized', supplier: 'GFS', received: '01/21/2026', finalized: '01/23/2026', delivery: '01/21/2026', credit: '$ 0.00', total: '$ 72.00' },
+            { id: '270741', status: 'Finalized', supplier: 'GFS', received: '01/22/2026', finalized: '01/22/2026', delivery: '01/22/2026', credit: '$ 0.00', total: '$ 36.00' },
+            { id: '270843', status: 'Finalized', supplier: 'GFS', received: '01/23/2026', finalized: '01/23/2026', delivery: '01/23/2026', credit: '$ 0.00', total: '$ 126.00' },
+            { id: '9031540464', status: 'Finalized', supplier: 'GFS', received: '01/24/2026', finalized: '01/25/2026', delivery: '01/24/2026', credit: '$ 0.00', total: '$ 8,137.20', alert: 6 },
+            { id: '49472411', status: 'Finalized', supplier: 'PEPSI', received: '01/26/2026', finalized: '01/26/2026', delivery: '01/26/2026', credit: '$ 0.00', total: '$ 884.17' },
+            { id: '271089', status: 'Finalized', supplier: 'GFS', received: '01/27/2026', finalized: '01/31/2026', delivery: '01/27/2026', credit: '$ 0.00', total: '$ 106.00' },
+            { id: '9031633013', status: 'Finalized', supplier: 'GFS', received: '01/28/2026', finalized: '01/29/2026', delivery: '01/28/2026', credit: '$ 0.00', total: '$ 4,944.79', alert: 4 },
+            { id: '271323', status: 'Finalized', supplier: 'GFS', received: '01/30/2026', finalized: '01/30/2026', delivery: '01/30/2026', credit: '$ 0.00', total: '$ 184.00' },
+            { id: '9031761668', status: 'Finalized', supplier: 'GFS', received: '01/31/2026', finalized: '01/31/2026', delivery: '01/31/2026', credit: '$ 0.00', total: '$ 9,260.28', alert: 11 }
+        ];
+
+        const itemizedEditData = [
+            { sku: '1019484', name: 'BACON CRUMBLE FZN', cat: 'MEAT COST', price: '94.33', desc: 'Case (4-2.27kg)', order: '0', ship: '1.0000', recv: '1.0000', total: '94.33', tax: '0.00' },
+            { sku: '1246390', name: 'BAG CRAZY BREAD CUSTOM K...', cat: 'PAPER COST', price: '104.32', desc: 'Case(1000ea)', order: '0', ship: '1.0000', recv: '1.0000', total: '104.32', tax: '12.00', alert: true },
+            { sku: '002', name: 'Blue Box Fee', cat: '-', price: '141.40', desc: '1.00 * 1.00 ea', order: '0', ship: '1.0000', recv: '1.0000', total: '141.40', tax: '0.00', blue: true },
+            { sku: '1504250', name: 'BOX CUSTOM PIZZA PUFF LITT...', cat: 'PAPER COST', price: '55.44', desc: '1.00 * 200.00 ea', order: '0', ship: '1.0000', recv: '1.0000', total: '55.44', tax: '6.38', alert: true },
+            { sku: '1258440', name: 'BOX PIZZA CUSTOM 14IN LITT...', cat: 'PAPER COST', price: '24.11', desc: 'Bale (50ea)', order: '0', ship: '5.0000', recv: '5.0000', total: '120.57', tax: '13.87', alert: true },
+            { sku: '1272657', name: 'BOX PIZZA CUSTOM DD DISH LC', cat: 'PAPER COST', price: '38.45', desc: 'Bale (100ea)', order: '0', ship: '1.0000', recv: '1.0000', total: '38.45', tax: '4.42', alert: true },
+            { sku: '1130895', name: 'BOX PIZZA PORTAL 12IN', cat: 'PAPER COST', price: '34.91', desc: 'Bale (100ea)', order: '0', ship: '10.0000', recv: '10.0000', total: '349.06', tax: '40.16', alert: true },
+            { sku: '1290149', name: 'CDC3D CHEESE SHRED PIZZA B...', cat: 'CHEESE COST', price: '121.29', desc: 'Case (4-2.75kg)', order: '0', ship: '20.0000', recv: '20.0000', total: '2425.80', tax: '0.00' },
+            { sku: '1395136', name: 'CHEESE PARM GRATED FRSH', cat: 'CHEESE COST', price: '150.20', desc: 'Case(4*2.27kg)', order: '0', ship: '1.0000', recv: '1.0000', total: '150.20', tax: '0.00' },
+            { sku: '1328510', name: 'CHEESE STRING BULK FZN', cat: 'DAIRY COST', price: '98.07', desc: 'Case(15lb)', order: '0', ship: '2.0000', recv: '2.0000', total: '196.14', tax: '0.00' },
+            { sku: '1053519', name: 'CHICKEN WING CKD FZN', cat: 'WINGS COST', price: '59.04', desc: 'Case (2-2kg)', order: '0', ship: '4.0000', recv: '4.0000', total: '236.16', tax: '0.00' },
+            { sku: '1399603', name: 'COOKIE SHORTBREAD MINI C...', cat: 'DESSERT COST', price: '53.22', desc: 'Case(300ea)', order: '0', ship: '1.0000', recv: '1.0000', total: '53.22', tax: '0.00', alert: true },
+            { sku: '1214204', name: 'FLOUR ENRICHED BLEACHED', cat: 'DOUGH COST', price: '29.91', desc: 'Case (2-27lb)', order: '0', ship: '55.0000', recv: '55.0000', total: '1645.05', tax: '0.00' },
+            { sku: '1282873', name: 'MIX DOUGH PIZZA', cat: 'DOUGH COST', price: '48.25', desc: 'Case(25*17oz)', order: '0', ship: '2.0000', recv: '2.0000', total: '96.50', tax: '0.00' },
+            { sku: '1125457', name: 'OIL CANOLA JIB ZTF ANTI FOAM', cat: 'DOUGH COST', price: '38.25', desc: 'Bottle(16ltr)', order: '0', ship: '1.0000', recv: '1.0000', total: '38.25', tax: '0.00' },
+            { sku: '1443639', name: 'PEPPERONI FZN', cat: 'MEAT COST', price: '116.29', desc: 'Case(2-5.67kg)', order: '0', ship: '4.0000', recv: '4.0000', total: '465.16', tax: '0.00' },
+            { sku: '1069413', name: 'PLATE PPR ECONO WHT 9IN U...', cat: 'PAPER COST', price: '73.18', desc: 'Case(12*100ea)', order: '0', ship: '1.0000', recv: '1.0000', total: '73.18', tax: '8.42', alert: true },
+            { sku: '1170093', name: 'SAUCE DIPPERS GARLIC CREA...', cat: 'OTHER FOOD COST', price: '31.43', desc: 'Case(96ea)', order: '0', ship: '4.0000', recv: '4.0000', total: '125.72', tax: '0.00' },
+            { sku: '1301944', name: 'SAUCE PIZZA', cat: 'TOPPINGS COST', price: '44.73', desc: 'Case(4-159oz)', order: '0', ship: '10.0000', recv: '10.0000', total: '447.30', tax: '0.00' }
+        ];
+
+        const categoryEditData = [
+            { gl: '-', name: 'No Category', major: 'No Category', total: 1, price: '141.4', tax: '0', totalP: '141.4' },
+            { gl: '5115000', name: 'WINGS COST', major: 'COGS-FOOD', total: 1, price: '236.16', tax: '0', totalP: '236.16' },
+            { gl: '5106000', name: 'DAIRY COST', major: 'COGS-FOOD', total: 1, price: '196.14', tax: '0', totalP: '196.14' },
+            { gl: '5101000', name: 'MEAT COST', major: 'COGS-FOOD', total: 2, price: '559.49', tax: '0', totalP: '559.49' },
+            { gl: '5103000', name: 'TOPPINGS COST', major: 'COGS-FOOD', total: 1, price: '447.3', tax: '0', totalP: '447.3' },
+            { gl: '5114000', name: 'DESSERT COST', major: 'COGS-FOOD', total: 1, price: '53.22', tax: '0', totalP: '53.22' },
+            { gl: '5110000', name: 'DOUGH COST', major: 'COGS-FOOD', total: 3, price: '1779.8', tax: '0', totalP: '1779.8' },
+            { gl: '5109000', name: 'OTHER FOOD COST', major: 'COGS-FOOD', total: 1, price: '125.72', tax: '0', totalP: '125.72' },
+            { gl: '5105000', name: 'CHEESE COST', major: 'COGS-FOOD', total: 2, price: '2576', tax: '0', totalP: '2576' },
+            { gl: '5200000', name: 'PAPER COST', major: 'COGS-PAPER', total: 6, price: '655.77', tax: '85.25', totalP: '741.02' }
+        ];
+
+        // --- Functions ---
+        function populateInvoiceList() {
+            const body = document.getElementById('invoiceListBody');
+            body.innerHTML = invoiceListData.map(inv => `
+                <tr class="data-row cursor-pointer" onclick="openInvoiceEdit('${inv.id}', '${inv.supplier}')">
+                    <td class="flex items-center space-x-2">
+                        <span class="status-finalized">${inv.status}</span>
+                        ${inv.alert ? `<div class="warning-badge"><i data-lucide="alert-triangle" class="w-3 h-3"></i> ${inv.alert}</div>` : ''}
+                    </td>
+                    <td>${inv.id}</td>
+                    <td class="font-bold">${inv.supplier}</td>
+                    <td>${inv.received}</td>
+                    <td>${inv.finalized}</td>
+                    <td>${inv.delivery}</td>
+                    <td class="text-right text-slate-400">${inv.credit}</td>
+                    <td class="text-right font-bold">${inv.total}</td>
+                    <td class="text-center"><i data-lucide="edit-3" class="w-4 h-4 text-blue-400 mx-auto"></i></td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function populateEditItems() {
+            const body = document.getElementById('editItemBody');
+            body.innerHTML = itemizedEditData.map(item => `
+                <tr class="bg-white data-row">
+                    <td class="flex items-center space-x-2">
+                        <span class="${item.blue ? 'text-slate-800' : 'text-slate-400'}">${item.sku}</span>
+                        ${item.alert ? `<i data-lucide="alert-triangle" class="w-3 h-3 text-rose-500"></i>` : ''}
+                    </td>
+                    <td class="font-bold uppercase ${item.blue ? 'text-blue-500' : ''}">${item.name}</td>
+                    <td class="text-slate-400 uppercase">${item.cat}</td>
+                    <td class="text-right">$${item.price}</td>
+                    <td>${item.desc}</td>
+                    <td class="text-center">${item.order}</td>
+                    <td class="text-center">${item.ship}</td>
+                    <td class="text-center">${item.recv}</td>
+                    <td class="text-right">$${item.total}</td>
+                    <td class="text-right">$${item.tax}</td>
+                    <td class="text-right font-bold">$${item.total}</td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function populateEditCategories() {
+            const body = document.getElementById('editCategoryBody');
+            body.innerHTML = categoryEditData.map(cat => `
+                <tr class="bg-white data-row">
+                    <td class="font-medium flex items-center space-x-2">${cat.gl} ${cat.gl !== '-' ? '' : ''}</td>
+                    <td class="font-bold uppercase">${cat.name}</td>
+                    <td class="text-slate-400 font-bold uppercase">${cat.major}</td>
+                    <td class="text-center font-bold">${cat.total}</td>
+                    <td class="text-right font-bold">${cat.price}</td>
+                    <td class="text-right font-bold">${cat.tax}</td>
+                    <td class="text-right font-bold">$ ${cat.totalP}</td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openInvoiceEdit(invNo, supplier) {
+            document.getElementById('listView').classList.remove('view-active');
+            document.getElementById('editView').classList.add('view-active');
+            document.getElementById('editInvNo').innerText = invNo;
+            document.getElementById('editSupplier').innerText = supplier;
+            populateEditItems();
+            populateEditCategories();
+        }
+
+        function closeInvoiceEdit() {
+            document.getElementById('editView').classList.remove('view-active');
+            document.getElementById('listView').classList.add('view-active');
+        }
+
+        // View Toggles
+        const btnItems = document.getElementById('toggleItems');
+        const btnCat = document.getElementById('toggleCategory');
+        const tblItems = document.getElementById('itemsTableView');
+        const tblCat = document.getElementById('categoryTableView');
+
+        btnItems.addEventListener('click', () => {
+            tblItems.classList.remove('hidden');
+            tblCat.classList.add('hidden');
+            btnItems.className = 'px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700';
+            btnCat.className = 'px-5 py-1 text-[10px] font-bold rounded-full text-slate-400';
+        });
+
+        btnCat.addEventListener('click', () => {
+            tblCat.classList.remove('hidden');
+            tblItems.classList.add('hidden');
+            btnCat.className = 'px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700';
+            btnItems.className = 'px-5 py-1 text-[10px] font-bold rounded-full text-slate-400';
+        });
+
+        // Filter Dropdown logic
+        const filterToggle = document.getElementById('filterToggle');
+        const filterDropdown = document.getElementById('filterDropdown');
+        const closeFilter = document.getElementById('closeFilter');
+        filterToggle.addEventListener('click', (e) => { e.stopPropagation(); filterDropdown.classList.toggle('hidden-dropdown'); });
+        closeFilter.addEventListener('click', () => filterDropdown.classList.add('hidden-dropdown'));
+        window.addEventListener('click', (e) => { if (!filterDropdown.contains(e.target) && e.target !== filterToggle) filterDropdown.classList.add('hidden-dropdown'); });
+
+        // Initial Load
+        window.onload = () => {
+            populateInvoiceList();
+        };
+    </script>
+</body>
+</html>

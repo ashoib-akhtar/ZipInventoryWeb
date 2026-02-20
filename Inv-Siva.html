@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prof Inventory - Audit System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans', sans-serif; }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .tooltip { position: relative; }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #422006;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1.2;
+            pointer-events: none;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+        @keyframes highlight-glow {
+            0% { background-color: #fefce8; border-color: #eab308; }
+            100% { background-color: transparent; border-color: transparent; }
+        }
+        .item-highlight {
+            animation: highlight-glow 3s ease-out;
+            border-left: 4px solid #eab308 !important;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .is-listening {
+            color: #ef4444 !important;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        /* Dropdown Animation */
+        .dropdown-animate {
+            transform-origin: top right;
+            transition: all 0.1s ease-out;
+        }
+        .dropdown-hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+		
+		/* Sidebar default state: Icons only */
+aside {
+    width: 72px; 
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #10192d;
+}
+
+/* Sidebar expanded state on hover */
+aside:hover {
+    width: 260px; 
+}
+
+/* Hide text and arrows when collapsed */
+aside span, aside .nav-arrow {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+aside:hover span, aside:hover .nav-arrow {
+    opacity: 1;
+}
+
+/* Icon container styling for consistent alignment */
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+    </style>
+	
+</head>
+<body class="bg-[#f8fafc] text-slate-700 select-none overflow-hidden h-screen flex flex-row">
+
+<aside class="text-slate-400 flex flex-col shrink-0 z-50 shadow-2xl">
+    <div class="p-4 flex items-center gap-4 border-b border-white/5 bg-[#1e293b]/20 h-16">
+        <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white shrink-0 shadow-lg">
+            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+        </div>
+        <span class="text-white font-bold tracking-tight text-lg"></span>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 space-y-1 overflow-x-hidden custom-scrollbar">
+        <a href="index.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="home"></i></div>
+            <span class="text-sm font-medium">Dashboard</span>
+        </a>
+
+        <a href="Inv-Invoice.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="file-text"></i></div>
+            <span class="text-sm font-medium">Invoices</span>
+        </a>
+
+        <a href="Inv-CreditMemo.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="wallet"></i></div>
+            <span class="text-sm font-medium">Credit Memo</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-6 px-6 py-3 bg-indigo-600/10 text-white border-l-4 border-indigo-500 group">
+            <div class="nav-icon"><i data-lucide="clipboard-check" class="text-indigo-400"></i></div>
+            <span class="text-sm font-bold">Inventory</span>
+        </a>
+
+        <a href="Inv-Sales.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="pie-chart"></i></div>
+            <span class="text-sm font-medium">Actual Sales</span>
+        </a>
+
+        <a href="Inv-Sales.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="trending-up"></i></div>
+            <span class="text-sm font-medium">Forecasted Sales</span>
+        </a>
+
+        <a href="Inv-MenuMix.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="utensils"></i></div>
+            <span class="text-sm font-medium">Menu Mix</span>
+        </a>
+
+        <a href="Inv-OnHand.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="package"></i></div>
+            <span class="text-sm font-medium">On Hand</span>
+        </a>
+
+        <a href="Inv-Waste.html" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+            <div class="nav-icon"><i data-lucide="trash-2"></i></div>
+            <span class="text-sm font-medium">Waste</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-6 px-6 py-3 hover:bg-white/5 hover:text-white transition-all border-b border-white/5 pb-4">
+            <div class="nav-icon"><i data-lucide="truck"></i></div>
+            <span class="text-sm font-medium">Supplier Price List</span>
+        </a>
+
+        <div class="pt-4">
+            <a href="Inv-Reports.html" class="flex items-center justify-between px-6 py-3 hover:bg-white/5 hover:text-white transition-all">
+                <div class="flex items-center gap-6">
+                    <div class="nav-icon"><i data-lucide="bar-chart-3"></i></div>
+                    <span class="text-sm font-medium">Reports</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 nav-arrow"></i>
+            </a>
+
+           
+        </div>
+    </nav>
+</aside>
+	
+	<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+	
+    <!-- Header -->
+    <header class="bg-[#10192d] border-b border-white/10 h-14 flex items-center justify-between px-6 z-40 shrink-0 text-white">
+    <div class="flex items-center gap-8">
+        <button class="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/90 hover:text-white transition-colors">
+            MY APPS <i data-lucide="chevron-down" class="w-4 h-4 text-indigo-400"></i>
+        </button>
+        
+        <div class="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-md border border-white/10 cursor-pointer hover:bg-white/10 transition-all">
+            <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
+            <span class="text-sm font-medium tracking-tight">Costa Mesa</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4 border-r border-white/10 pr-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sun" class="w-4 h-4 text-yellow-500 animate-pulse"></i>
+                <span class="text-sm font-black tracking-tighter">09:20<span class="text-[10px] ml-0.5 opacity-70">A</span></span>
+            </div>
+            <span class="text-[9px] font-black text-white/40 uppercase tracking-[0.15em] whitespace-nowrap">America/Los Angeles</span>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-md border border-white/10 cursor-pointer hover:bg-white/10">
+            <i data-lucide="building-2" class="w-4 h-4 text-indigo-400"></i>
+            <span class="text-[11px] font-black uppercase tracking-widest">Corporate</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+        </div>
+
+        <div class="relative group cursor-pointer">
+            <div class="w-9 h-9 rounded-full border-2 border-indigo-500/50 p-0.5 overflow-hidden bg-slate-800 transition-transform hover:scale-105">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-full h-full object-cover rounded-full">
+            </div>
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#10192d] rounded-full"></div>
+        </div>
+    </div>
+</header>
+
+<div class="bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 h-10">
+    <div class="flex h-full">
+        <button class="flex items-center gap-2 px-4 text-[11px] font-bold text-indigo-600 border-b-2 border-indigo-600 h-full">
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+            Item Count
+        </button>
+        
+       <a id="tab-variance" 
+   href="Inv-Variance.html" 
+   class="flex items-center gap-2 px-4 text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors h-full no-underline">
+    <i data-lucide="scale" class="w-3.5 h-3.5"></i>
+    <span>Variance</span>
+</a>
+        
+        <button class="flex items-center gap-2 px-4 text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors h-full">
+            <i data-lucide="file-bar-chart" class="w-3.5 h-3.5"></i>
+            Inventory Breakdown
+        </button>
+        
+        <button class="flex items-center gap-2 px-4 text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors h-full">
+            <i data-lucide="history" class="w-3.5 h-3.5"></i>
+            Audit Trail
+        </button>
+    </div>
+
+   <a href="Inv-inventory.html" 
+   class="flex items-center gap-1.5 px-3 py-1 bg-red-500 text-white rounded text-[10px] font-black uppercase tracking-wider hover:bg-red-600 transition-colors no-underline shadow-sm">
+    <i data-lucide="x" class="w-3 h-3"></i>
+    Close
+</a>
+</div>
+
+
+    <!-- Sub-header/Controls -->
+    <div class="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-50">
+        <div class="flex items-center gap-4 flex-1">
+            <div class="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded bg-slate-50 min-w-[150px]">
+                <span class="text-xs font-bold text-slate-600">Period: 02/07/2026</span>
+            </div>
+            
+            <div class="relative flex-1 max-w-sm flex items-center gap-2">
+                <div class="relative flex-1 group">
+                    <input id="searchInput" type="text" placeholder="Search by name, SKU or location..." class="w-full pl-2 pr-10 py-1 border-b border-slate-200 text-xs outline-none focus:border-indigo-500 bg-transparent transition-colors">
+                    <button id="voiceSearchBtn" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-1 transition-colors" title="Voice Search">
+                        <i data-lucide="mic" class="w-4 h-4" id="micIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative">
+                <button id="filterBtn" class="flex items-center gap-2 px-4 py-1.5 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full text-xs font-medium transition-colors">
+                    Filter <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                </button>
+
+                <div id="filterDropdown" class="hidden absolute top-full mt-2 left-0 w-72 bg-white border border-slate-200 rounded-lg shadow-2xl z-[100] p-5">
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Storage Location(s)</h3>
+                        <button id="closeFilter"><i data-lucide="x" class="w-3.5 h-3.5 text-slate-300 hover:text-slate-500"></i></button>
+                    </div>
+                    <div class="w-12 h-0.5 bg-indigo-500 mb-6"></div>
+                    <div class="space-y-3 mb-6" id="locationRadios"></div>
+                    <div class="flex justify-end pt-2">
+                        <button id="applyFilter" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2 rounded-full text-xs font-bold shadow-md">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded text-xs font-bold hover:bg-emerald-600 shadow-sm transition-colors">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i> Save 
+            </button>
+			<button class="flex items-center gap-1.5 px-3 py-1.5 bg-[#2ecc71] text-white rounded text-xs font-bold hover:bg-green-600 shadow-sm transition-colors">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Heal 
+            </button>
+            <button class="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 shadow-sm transition-colors uppercase tracking-tight">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Finalize 
+            </button>
+
+            <!-- Action Dropdown for Print/Export -->
+            <div class="relative">
+                <button id="exportDropdownBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all">
+                    <i data-lucide="printer" class="w-4 h-4"></i> 
+                    <span class="text-xs font-bold uppercase tracking-tighter">Print</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 ml-0.5"></i>
+                </button>
+                
+                <div id="exportMenu" class="dropdown-animate dropdown-hidden absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-xl z-[150] overflow-hidden">
+                    <div class="py-1">
+                        <div class="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 border-b border-slate-100">Audit Reports</div>
+                        <button onclick="handleExport('Export Count PDF')" class="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-3">
+                            <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i> Export Count PDF
+                        </button>
+                        <button onclick="handleExport('Export Count CSV')" class="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-3 border-b border-slate-50">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-slate-400"></i> Export Count CSV
+                        </button>
+                        
+                        <div class="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 border-b border-slate-100">Templates</div>
+                        <button onclick="handleExport('Export Blank PDF')" class="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-3">
+                            <i data-lucide="file" class="w-4 h-4 text-slate-400"></i> Export Blank PDF
+                        </button>
+                        <button onclick="handleExport('Export Blank CSV')" class="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-3 border-b border-slate-50">
+                            <i data-lucide="file-code" class="w-4 h-4 text-slate-400"></i> Export Blank CSV
+                        </button>
+
+                        <div class="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 border-b border-slate-100">Data Management</div>
+                        <button onclick="handleExport('Import CSV')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 flex items-center gap-3">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Import CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column Headers -->
+    <div class="bg-slate-100 border-b border-slate-200 grid grid-cols-[minmax(250px,1.5fr)_1fr_1fr_1fr_1fr_80px_100px_100px] px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0">
+    <div class="text-left pl-12">Audit Item Detail</div>
+    <div class="text-center">Count 1</div>
+    <div class="text-center">Count 2</div>
+    <div class="text-center">Count 3</div>
+    <div class="text-center">Count 4</div>
+    <div class="text-center">Warnings</div> <div class="text-right">Total Qty</div>
+    <div class="text-right pr-4">Inv Value</div>
+</div>
+
+    <!-- Main Grid Content -->
+    <div class="flex-1 overflow-auto bg-white" id="inventoryContainer">
+        <div class="min-w-[1200px]" id="inventoryGrid"></div>
+    </div>
+
+    <!-- Warning Summary Modal (Yellow Theme) -->
+    <div id="warningModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200">
+            <div class="bg-yellow-50 px-6 py-4 border-b border-yellow-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 text-white rounded-lg flex items-center justify-center">
+                        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-black text-slate-800 uppercase tracking-tight text-sm">Alert Warning</h2>
+                        <p class="text-[10px] text-yellow-700 font-bold uppercase tracking-wider">Verification required for items flagged yellow</p>
+                    </div>
+                </div>
+                <button onclick="closeWarningModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="max-h-[60vh] overflow-auto p-4 space-y-2" id="warningModalList">
+                <!-- Warning items injected here -->
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end">
+                <button onclick="closeWarningModal()" class="bg-slate-800 text-white px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl z-[300] opacity-0 pointer-events-none transition-all duration-300">
+        Processing action...
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+        <div class="flex gap-4 items-center">
+            <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200" id="statusTabs">
+                <button data-status="All" class="status-tab px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all bg-white text-indigo-700 shadow-sm">Scope (0)</button>
+                <button data-status="Counted" class="status-tab px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all text-slate-500">Verified (0)</button>
+                <button data-status="Uncounted" class="status-tab px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all text-slate-500">Pending (0)</button>
+            </div>
+            
+            <button id="footerWarning" onclick="openWarningModal()" class="hidden flex items-center gap-2 px-3 py-1 bg-yellow-50 rounded-full border border-yellow-200 text-yellow-700 hover:bg-yellow-100 transition-colors">
+                <i data-lucide="alert-triangle" class="w-3 h-3 fill-current"></i> 
+                <span class="text-[10px] font-black uppercase tracking-tighter" id="warningCountText">Discrepancies: 0</span>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col items-end">
+            <span class="text-slate-400 text-[8px] font-black uppercase tracking-widest mb-1" id="totalLabel">Inventory Value</span>
+            <div class="flex items-center gap-3">
+                <span class="text-[10px] font-bold text-slate-400 italic" id="itemCountDisplay">(0 items)</span>
+                <span class="bg-slate-900 text-white px-4 py-1.5 rounded-lg text-sm font-black tracking-tight shadow-md border border-white/10 font-mono" id="totalValueDisplay">$ 0.00</span>
+            </div>
+        </div>
+    </footer>
+	</main>
+
+    <script>
+        let activeLocation = 'All';
+        let activeStatus = 'All';
+        let searchTerm = '';
+        let tempLocation = 'All';
+        
+        const locations = ['All', 'Rack1', 'Rack2', 'Rack3', 'Walk In'];
+        const locationMapping = { 'All': 'All', 'Rack1': 'Dry Storage', 'Rack2': 'Freezer', 'Rack3': 'Dry Storage', 'Walk In': 'Walk-in Cooler' };
+        
+        let inventory = [
+            { id: 1, name: "All Purpose Flour - 50lb", sku: "SYS-102938", counts: [2, 0, 0, 0], unit: "bag", location: 'Dry Storage', price: 24.50, warningType: 'high_variance' },
+            { id: 2, name: "Canola Oil - 35lb", sku: "SYS-445566", counts: [5, 2, 0, 0], unit: "jug", location: 'Dry Storage', price: 42.10, warningType: null },
+            { id: 13, name: "Brioche Bun - 48ct", sku: "BAKE-332", counts: [0, 0, 0, 0], unit: "cs", location: 'Dry Storage', price: 18.20, warningType: null },
+            { id: 5, name: "Heavy Cream 36% - 1qt", sku: "DAI-1122", counts: [12, 4, 0, 0], unit: "ctn", location: 'Walk-in Cooler', price: 5.45, warningType: null },
+            { id: 6, name: "Unsalted Butter - 1lb", sku: "DAI-5544", counts: [15, 0, 0, 0], unit: "lb", location: 'Walk-in Cooler', price: 4.80, warningType: 'shrink_pattern' },
+            { id: 16, name: "Broccoli Florets - 5lb", sku: "VEG-442", counts: [0, 0, 0, 0], unit: "bag", location: 'Walk-in Cooler', price: 9.30, warningType: null },
+            { id: 9, name: "Beef Patties 4:1 - 10lb", sku: "MEAT-001", counts: [4, 0, 0, 0], unit: "cs", location: 'Freezer', price: 168.90, warningType: 'high_cost' },
+            { id: 10, name: "French Fries 3/8 - 30lb", sku: "VEG-990", counts: [10, 8, 2, 0], unit: "cs", location: 'Freezer', price: 34.15, warningType: 'mismatch' },
+            { id: 11, name: "Chicken Wings - 40lb", sku: "MEAT-552", counts: [40, 0, 0, 0], unit: "cs", location: 'Freezer', price: 112.00, warningType: 'compliance' },
+            { id: 12, name: "Granulated Sugar - 50lb", sku: "SYS-9911", counts: [52, 0, 0, 0], unit: "bag", location: 'Dry Storage', price: 32.00, warningType: 'high_variance' }
+        ];
+
+        const units = ["case", "pack", "oz", "ea"];
+        const grid = document.getElementById('inventoryGrid');
+        const searchInput = document.getElementById('searchInput');
+        const voiceSearchBtn = document.getElementById('voiceSearchBtn');
+        const micIcon = document.getElementById('micIcon');
+        const filterBtn = document.getElementById('filterBtn');
+        const filterDropdown = document.getElementById('filterDropdown');
+        const exportDropdownBtn = document.getElementById('exportDropdownBtn');
+        const exportMenu = document.getElementById('exportMenu');
+        const locationRadios = document.getElementById('locationRadios');
+        const statusTabs = document.querySelectorAll('.status-tab');
+
+        function isItemCounted(item) { return item.counts.some(c => c > 0); }
+        function calculateItemTotalQty(item) { return item.counts.reduce((a, b) => a + b, 0); }
+        function calculateItemValue(item) { return calculateItemTotalQty(item) * item.price; }
+        
+        function hasAnyWarning(item) { 
+            return isItemCounted(item) && item.warningType !== null; 
+        }
+
+        function getWarningMessage(item) {
+            switch(item.warningType) {
+                case 'high_variance': return "High variance detected. Recount recommended.";
+                case 'high_cost': return "High cost impact detected. Please verify count.";
+                case 'shrink_pattern': return "Repeated shrink pattern detected. Investigation recommended.";
+                case 'mismatch': return "Supplier quantity mismatch detected.";
+                case 'compliance': return "Audit compliance threshold exceeded.";
+                default: return "Verification required.";
+            }
+        }
+
+        // Action Handlers
+        function handleExport(action) {
+            exportMenu.classList.add('dropdown-hidden');
+            const toast = document.getElementById('toast');
+            toast.innerText = `Starting: ${action}...`;
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2500);
+        }
+
+        // Voice Recognition Logic
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => { micIcon.classList.add('is-listening'); };
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                searchTerm = transcript;
+                render();
+            };
+            recognition.onend = () => { micIcon.classList.remove('is-listening'); };
+            recognition.onerror = () => { micIcon.classList.remove('is-listening'); };
+
+            voiceSearchBtn.addEventListener('click', () => { recognition.start(); });
+        } else {
+            voiceSearchBtn.style.display = 'none';
+        }
+
+        // Dropdown Handlers
+        exportDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportMenu.classList.toggle('dropdown-hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!exportDropdownBtn.contains(e.target) && !exportMenu.contains(e.target)) {
+                exportMenu.classList.add('dropdown-hidden');
+            }
+        });
+
+        function scrollToItem(id) {
+            closeWarningModal();
+            activeLocation = 'All';
+            activeStatus = 'All';
+            searchTerm = '';
+            searchInput.value = '';
+            render();
+
+            setTimeout(() => {
+                const element = document.getElementById(`item-row-${id}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('item-highlight');
+                    setTimeout(() => element.classList.remove('item-highlight'), 3000);
+                }
+            }, 100);
+        }
+
+        function openWarningModal() {
+            const modal = document.getElementById('warningModal');
+            const list = document.getElementById('warningModalList');
+            const warnedItems = inventory.filter(hasAnyWarning);
+
+            list.innerHTML = warnedItems.map(item => `
+                <div onclick="scrollToItem(${item.id})" class="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between hover:border-yellow-400 hover:bg-yellow-50 cursor-pointer transition-all shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-lg">
+                            ${item.location === 'Dry Storage' ? '📦' : item.location === 'Freezer' ? '🧊' : '🥦'}
+                        </div>
+                        <div>
+                            <div class="font-black text-xs text-slate-800 uppercase tracking-tight">${item.name}</div>
+                            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${item.location} • ${item.sku}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-yellow-600 text-[10px] font-black uppercase tracking-tighter">${getWarningMessage(item)}</div>
+                        <div class="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Value: $${calculateItemValue(item).toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function closeWarningModal() {
+            document.getElementById('warningModal').classList.add('hidden');
+        }
+
+        function render() {
+            const baseSet = inventory.filter(i => {
+                const target = locationMapping[activeLocation];
+                const matchesLoc = activeLocation === 'All' || i.location === target;
+                const matchesSearch = i.name.toLowerCase().includes(searchTerm.toLowerCase()) || i.sku.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesLoc && matchesSearch;
+            });
+
+            const displaySet = baseSet.filter(i => {
+                if (activeStatus === 'Counted') return isItemCounted(i);
+                if (activeStatus === 'Uncounted') return !isItemCounted(i);
+                return true;
+            });
+
+            const groups = {};
+            displaySet.forEach(item => {
+                if (!groups[item.location]) groups[item.location] = [];
+                groups[item.location].push(item);
+            });
+
+            const countedCount = baseSet.filter(isItemCounted).length;
+            document.querySelector('[data-status="All"]').innerText = `ALL (${baseSet.length})`;
+            document.querySelector('[data-status="Counted"]').innerText = `COUNTED (${countedCount})`;
+            document.querySelector('[data-status="Uncounted"]').innerText = `UNCOUNTED (${baseSet.length - countedCount})`;
+
+            const warningsCount = displaySet.filter(hasAnyWarning).length;
+            const footerWarning = document.getElementById('footerWarning');
+            if(warningsCount > 0) {
+                footerWarning.classList.remove('hidden');
+                document.getElementById('warningCountText').innerText = `Warning: ${warningsCount}`;
+            } else {
+                footerWarning.classList.add('hidden');
+            }
+
+            const totalValue = displaySet.reduce((acc, i) => acc + calculateItemValue(i), 0);
+            document.getElementById('totalValueDisplay').innerText = `$ ${totalValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            document.getElementById('itemCountDisplay').innerText = `(${displaySet.length} items)`;
+
+            grid.innerHTML = Object.entries(groups).map(([loc, items]) => {
+                const sTotalQty = items.reduce((acc, i) => acc + calculateItemTotalQty(i), 0);
+                const sVal = items.reduce((acc, i) => acc + calculateItemValue(i), 0);
+                const sWarn = items.filter(hasAnyWarning).length;
+
+                return `
+                    <div class="border-b border-slate-200">
+                        <div class="bg-slate-50/80 px-4 py-2 border-b border-slate-200 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md">
+                            <div class="font-black text-[11px] text-slate-800 flex items-center gap-2 uppercase tracking-tight">
+                                ${loc} <span class="text-[10px] text-slate-400 font-bold ml-1">(${items.length} items)</span>
+                            </div>
+                            <div class="flex items-center gap-8">
+                                ${sWarn > 0 ? `<button onclick="openWarningModal()" class="bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full text-[10px] font-black border border-yellow-200 flex items-center gap-1 hover:bg-yellow-100 transition-all"><i data-lucide="alert-triangle" class="w-2.5 h-2.5 fill-current"></i> ${sWarn}</button>` : ''}
+                                <div class="flex flex-col items-end"><span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Counted Qty</span><span class="text-[11px] font-black text-indigo-600">${sTotalQty.toFixed(2)}</span></div>
+                                <div class="flex flex-col items-end"><span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Inv Value</span><span class="text-[11px] font-black text-slate-700 font-mono">$${sVal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+                            </div>
+                        </div>
+                        ${items.map(item => {
+                            const icon = item.location === 'Dry Storage' ? '📦' : item.location === 'Freezer' ? '🧊' : '🥦';
+                            const itemQty = calculateItemTotalQty(item);
+                            const itemVal = calculateItemValue(item);
+                            const warned = hasAnyWarning(item);
+                            
+                            
+                            return `
+<div id="item-row-${item.id}" class="grid grid-cols-[minmax(250px,1.5fr)_1fr_1fr_1fr_1fr_80px_100px_100px] px-4 py-1 border-b border-slate-100 items-center hover:bg-indigo-50/20 group transition-colors duration-200">
+    <div class="flex items-center gap-3">
+        <div class="w-7 h-7 bg-slate-100 rounded flex items-center justify-center shrink-0 border border-slate-200 text-sm group-hover:bg-white">${icon}</div>
+        <div class="truncate">
+            <div class="font text-xs text-slate-800 leading-tight group-hover:text-indigo-700">${item.name}</div>
+            <div class="text-[8px] text-slate-400 font-bold uppercase mt-0.5 tracking-tighter">${item.sku} • $${item.price.toFixed(2)}</div>
+        </div>
+    </div>
+    
+    ${[0, 1, 2, 3].map(idx => `
+        <div class="flex items-center gap-2 justify-center">
+            <input type="number" onchange="updateCount(${item.id}, ${idx}, this.value)"
+                class="w-12 h-7 border rounded text-center font text-xs text-slate-700 outline-none transition-all ${item.counts[idx] > 0 ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-indigo-400'}"
+                value="${item.counts[idx] || ''}">
+            <span class="text-[10px] text-slate-600 font-bold uppercase tracking-tighter min-w-[30px]">
+                ${units[idx]}
+            </span>
+        </div>
+    `).join('')}
+
+    <div class="flex justify-center">
+        ${warned ? `
+            <div class="text-yellow-500 bg-yellow-50 p-1 rounded-md tooltip cursor-help ring-2 ring-yellow-200/50">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 fill-current"></i>
+                <span class="tooltiptext">${getWarningMessage(item)}</span>
+            </div>
+        ` : `
+            <div class="w-7 h-7 flex items-center justify-center text-slate-200">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </div>
+        `}
+    </div>
+
+    <div class="text-right flex items-center justify-end gap-1.5">
+    <div class="font-black text-xs ${itemQty > 0 ? 'text-indigo-600' : 'text-slate-300'}">
+        ${itemQty.toFixed(2)}
+    </div>
+    <div class="text-[9px] text-slate-500 font-extrabold uppercase tracking-tighter">
+        Case
+    </div>
+</div>
+    
+    <div class="text-right pr-4 font-black text-xs text-slate-700 font-mono">$${itemVal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+</div>`;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.updateCount = (id, idx, val) => {
+            const item = inventory.find(i => i.id === id);
+            item.counts[idx] = val === '' ? 0 : parseFloat(val) || 0;
+            render();
+        };
+
+        searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            render();
+        });
+
+        filterBtn.addEventListener('click', () => filterDropdown.classList.toggle('hidden'));
+        document.getElementById('closeFilter').addEventListener('click', () => filterDropdown.classList.add('hidden'));
+
+        document.getElementById('applyFilter').addEventListener('click', () => {
+            activeLocation = tempLocation;
+            filterDropdown.classList.add('hidden');
+            render();
+        });
+
+        statusTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                statusTabs.forEach(t => t.className = "status-tab px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all text-slate-500 hover:text-slate-700");
+                tab.className = "status-tab px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all bg-white text-indigo-700 shadow-sm";
+                activeStatus = tab.dataset.status;
+                render();
+            });
+        });
+
+        locationRadios.innerHTML = locations.map(loc => `
+            <label class="flex items-center gap-3 cursor-pointer group p-1 rounded-lg hover:bg-slate-50 transition-colors">
+                <input type="radio" name="storage" class="sr-only" ${loc === 'All' ? 'checked' : ''} onchange="tempLocation='${loc}'">
+                <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-indigo-400 transition-all">
+                    <div class="dot w-2.5 h-2.5 bg-indigo-500 rounded-full hidden"></div>
+                </div>
+                <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-700">${loc}</span>
+            </label>
+        `).join('');
+
+        locationRadios.addEventListener('change', (e) => {
+            document.querySelectorAll('#locationRadios label').forEach(l => {
+                const isChecked = l.querySelector('input').checked;
+                l.querySelector('.dot').classList.toggle('hidden', !isChecked);
+                l.querySelector('span').className = isChecked ? 'text-[11px] text-slate-900 font-bold uppercase tracking-widest' : 'text-[11px] text-slate-500 font-medium uppercase tracking-widest';
+            });
+        });
+
+        // Initialize
+        window.onload = () => {
+            render();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            locationRadios.querySelector('input').dispatchEvent(new Event('change', {bubbles: true}));
+        };
+    </script>
+</body>
+</html>

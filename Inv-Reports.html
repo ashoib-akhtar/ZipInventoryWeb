@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Operations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f8fafc;
+            height: 100vh;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        aside {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 64px; 
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            background-color: #0f172a;
+        }
+        aside:hover { width: 260px; }
+
+        .sidebar-logo-area {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            margin-bottom: 4px;
+            background-color: #1e293b;
+        }
+
+        .logo-box {
+            width: 32px; height: 32px;
+            background-color: #2563eb;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .menu-item {
+            display: flex; align-items: center; height: 44px;
+            padding: 0 20px; color: #94a3b8;
+            transition: all 0.2s; border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .menu-item i, .menu-item svg { width: 18px; min-width: 18px; display: flex; justify-content: center; }
+        .menu-text { opacity: 0; margin-left: 14px; font-size: 13px; transition: opacity 0.2s; }
+        aside:hover .menu-text { opacity: 1; }
+        .menu-item:hover, .menu-item.active { background-color: rgba(59, 130, 246, 0.1); color: white; border-left-color: #3b82f6; }
+
+        .submenu { background-color: rgba(15, 23, 42, 0.5); max-height: 0; overflow: hidden; transition: max-height 0.3s; }
+        aside:hover .submenu.open { max-height: 250px; }
+        .sub-menu-item { display: flex; align-items: center; height: 36px; padding-left: 54px; color: #64748b; font-size: 12px; transition: all 0.2s; }
+        .sub-menu-item:hover { color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
+
+        .report-card {
+            background: white; border-radius: 8px; padding: 12px 20px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s;
+            cursor: pointer; border: 1px solid #e2e8f0; min-width: 340px;
+        }
+        .report-card:hover { transform: translateY(-1px); border-color: #3b82f6; }
+
+        .hidden-view { display: none !important; }
+
+        .report-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            background: white;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .custom-select {
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 0 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            background: white;
+            outline: none;
+            min-width: 180px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+        }
+
+        .jira-table th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        .jira-table td {
+            padding: 16px 16px;
+            font-size: 12px;
+            color: #1e293b;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .status-dot { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+
+        .view-btn-pill {
+            background-color: #bbf7d0;
+            color: #166534;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .view-btn-pill:hover { background-color: #86efac; }
+
+        .resolve-btn {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563eb;
+            background-color: #eff6ff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #dbeafe;
+            transition: all 0.2s;
+        }
+        .resolve-btn:hover {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .done-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #059669;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+		
+		.incomplete-btn-red {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffffff;
+    background-color: #dc2626; /* Strong Red */
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: 1px solid #b91c1c;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
+}
+
+.incomplete-btn-red:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+}
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+<aside class="h-screen sticky top-0 bg-[#0f172a] z-30 shadow-xl flex flex-col">
+    <div class="sidebar-logo-area">
+        <div class="logo-box"><i data-lucide="layout-grid" class="text-white w-4 h-4"></i></div>
+        <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider uppercase"></span>
+    </div>
+    <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar pt-1">
+        <a href="index.html" onclick="switchView('dashboard')" id="nav-dashboard" class="menu-item"><i data-lucide="home"></i><span class="menu-text">Dashboard</span></a>
+        <a href="Inv-Invoice.html" class="menu-item"><i data-lucide="file-text"></i><span class="menu-text">Invoices</span></a>
+        <a href="Inv-CreditMemo.html" class="menu-item"><i data-lucide="wallet"></i><span class="menu-text">Credit Memo</span></a>
+        <a href="Inv-Transfers.html" class="menu-item"><i data-lucide="repeat"></i><span class="menu-text">Transfer</span></a>
+        <a href="Inv-Inventory.html" class="menu-item"><i data-lucide="clipboard-check"></i><span class="menu-text">Inventory</span></a>
+        <a href="Inv-Sales.html" class="menu-item"><i data-lucide="pie-chart"></i><span class="menu-text">Actual Sales</span></a>
+        <a href="Inv-Sales.html" class="menu-item"><i data-lucide="trending-up"></i><span class="menu-text">Forecasted Sales</span></a>
+        <a href="Inv-MenuMix.html" class="menu-item"><i data-lucide="utensils"></i><span class="menu-text">Menu Mix</span></a>
+        <a href="Inv-OnHand.html" class="menu-item"><i data-lucide="package"></i><span class="menu-text">On Hand</span></a>
+        <a href="#" class="menu-item"><i data-lucide="users"></i><span class="menu-text">Employees</span></a>
+        <a href="Inv-Waste" class="menu-item"><i data-lucide="trash-2"></i><span class="menu-text">Waste</span></a>
+        <a href="#" class="menu-item"><i data-lucide="truck"></i><span class="menu-text">Supplier Price List</span></a>
+
+        <div class="mt-auto border-t border-slate-800/50 pt-2 mb-2">
+            <a href="javascript:void(0)" onclick="switchView('reports')" id="nav-reports" class="menu-item active flex justify-between group">
+                <div class="flex items-center"><i data-lucide="bar-chart-2"></i><span class="menu-text">Reports</span></div>
+                <i data-lucide="chevron-down" class="w-3 h-3 menu-text opacity-0 transition-transform"></i>
+            </a>
+            <div id="reportsSubmenu" class="submenu open">
+                <a href="javascript:void(0)" onclick="switchView('reports')" class="sub-menu-item">Cumulative Variance</a>
+                <a href="javascript:void(0)" onclick="switchView('reports')" class="sub-menu-item">GL COGS Export</a>
+                <a href="javascript:void(0)" onclick="switchView('reports-inventory-status')" class="sub-menu-item">Inventory Item Status</a>
+            </div>
+            
+        </div>
+    </nav>
+</aside>
+
+<main class="flex-1 flex flex-col min-w-0 h-full">
+    <header class="h-14 bg-[#0f172a] text-white flex items-center justify-between px-6 border-b border-slate-700 flex-shrink-0">
+        <div class="flex items-center space-x-6 text-[12px]">
+            <div class="flex items-center space-x-2 uppercase text-slate-200 cursor-pointer"><span>My Apps</span><i data-lucide="chevron-down" class="w-3 h-3"></i></div>
+            <div class="bg-slate-800/50 px-3 py-1 rounded text-sm text-slate-300">Costa Mesa</div>
+        </div>
+        <div class="flex items-center space-x-4">
+             <div class="flex items-center space-x-2 text-xs font-semibold">
+                <i data-lucide="cloud-sun" class="w-4 h-4 text-yellow-400"></i><span>09:20<sup class="text-[8px] opacity-70">A</sup></span>
+            </div>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full border border-slate-600">
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto bg-white">
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="hidden-view p-6">
+            <h2 class="text-xl font-bold">Dashboard Placeholder</h2>
+        </div>
+
+        <!-- Reports Hub View -->
+        <div id="reportsView" class="p-4 bg-slate-50 h-full">
+            <div class="flex flex-wrap items-start gap-4">
+                <div class="report-card">
+                    <div class="report-icon-container"><i data-lucide="line-chart" class="w-4 h-4 text-slate-500"></i></div>
+                    <div class="flex flex-col">
+                        <h3 class="text-[12px] font-bold text-slate-700">Cumulative Variance Report</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">View Cumulative Variance Report</p>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon-container"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-slate-500"></i></div>
+                    <div class="flex flex-col">
+                        <h3 class="text-[12px] font-bold text-slate-700">GL COGS Export Report</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">View GL COGS Export Report</p>
+                    </div>
+                </div>
+                <div class="report-card" onclick="switchView('reports-inventory-status')">
+                    <div class="report-icon-container"><i data-lucide="clipboard-list" class="w-4 h-4 text-slate-500"></i></div>
+                    <div class="flex flex-col">
+                        <h3 class="text-[12px] font-bold text-slate-700">Prerequisite - Inventory Item Status Report</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Configuration diagnostic check</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Item Status Report View -->
+        <div id="inventoryStatusReportView" class="hidden-view flex flex-col h-full bg-white">
+            <!-- Top Bar -->
+            <div class="report-header-bar">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4 text-blue-500"></i>
+                    <h1 class="text-[13px] font-bold text-slate-700">Inventory Item Status Report</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 border border-slate-200 px-3 py-1 rounded-md hover:bg-slate-50">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Row -->
+            <div class="filter-row">
+                <select id="vSelect" onchange="loadItems()" class="custom-select">
+                    <option value="">Select Supplier</option>
+                    <option value="Sysco">Sysco</option>
+                    <option value="GFS">GFS</option>
+                    <option value="Blue Line">Blue Line</option>
+                    <option value="MGD">MGD</option>
+                </select>
+                <select id="iSelect" disabled class="custom-select">
+                    <option value="">Select Items</option>
+                </select>
+                <button onclick="runDiagnostic()" class="view-btn-pill">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View
+                </button>
+            </div>
+			
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Empty State -->
+                <div id="emptyState" class="flex flex-col items-center justify-center h-64 text-center mt-20">
+                    <div class="relative mb-6">
+                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="60" cy="60" r="50" fill="#F8FAFC" />
+                            <rect x="40" y="45" width="40" height="30" rx="2" stroke="#CBD5E1" stroke-width="2" />
+                            <path d="M40 55L60 70L80 55" stroke="#CBD5E1" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-400">No data to display</p>
+                </div>
+
+                <!-- Diagnostic Content -->
+                <div id="diagnosticResults" class="hidden max-w-5xl mx-0">
+                                        
+                    <!-- Status Table in Tabular Format -->
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mt-4">
+                        <table class="w-full jira-table">
+                            <thead>
+     <tr>
+        <th class="w-[8%] text-center">Status</th>
+        <th class="w-[22%]">Prerequisite Setting</th>
+        <th class="w-[55%]">Configuration Details</th>
+        <th class="w-[15%] text-center">Action</th>
+    </tr>
+</thead>
+                            <tbody id="diagBody">
+                                <!-- Rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    lucide.createIcons();
+
+    const data = {
+        "Sysco": ["Chicken Breast 5LB", "Avocado Hass 48CT", "Heavy Cream 1GAL"],
+        "GFS": ["Salmon Fillet 10LB", "Beef Brisket", "Shredded Mozzarella"],
+        "Blue Line": ["Pizza Dough 12oz", "Signature Sauce", "Pepperoni Sliced"],
+        "MGD": ["New York Strip 8oz", "Pork Loin", "Ground Beef 80/20"]
+    };
+
+    const prerequisites = [
+    { name: "Ingredient Mapping", active_msg: "Item is correctly mapped to the system ingredient.", missing_msg: "Ingredient mapping is missing or invalid.", is_incomplete: false },
+    { name: "Storage Location Setup", active_msg: "Storage location is assigned to store level.", missing_msg: "Assigned to Global, missing store-level assignment.", is_incomplete: false },
+    { name: "Storage Location Assigned", active_msg: "Area: 'Back Storage Area' is validated.", missing_msg: "No specific storage area assigned.", is_incomplete: false },
+    { name: "Count Frequency", active_msg: "Frequency set to 'Monthly'.", missing_msg: "Count frequency is not defined.", is_incomplete: false },
+    { name: "Store Level Ingredient Setup", active_msg: "Ingredient setup is currently Active.", missing_msg: "Ingredient setup is Inactive at store level.", is_incomplete: false },
+    { name: "Store Level Catalog Setup", active_msg: "Catalog setup is currently Active.", missing_msg: "Catalog setup is Inactive at store level.", is_incomplete: false },
+    { name: "Is Inventory Active", active_msg: "Marked as 'Active' for inventory tracking.", missing_msg: "Item is Inactive for inventory.", is_incomplete: false },
+    // Incomplete Items
+    { name: "Is Active at Store Level", active_msg: "Marked as 'Active'.", missing_msg: "Marked as 'inActive'.", is_incomplete: true },
+    { name: "Is Global Ingredient/Vendor", active_msg: "Global status is set to 'Yes'.", missing_msg: "Global active status is 'No'.", is_incomplete: true }
+];
+
+    function loadItems() {
+        const v = document.getElementById('vSelect').value;
+        const iS = document.getElementById('iSelect');
+        iS.innerHTML = '<option value="">Select Items</option>';
+        if(v) {
+            iS.disabled = false;
+            data[v].forEach(item => { iS.innerHTML += `<option value="${item}">${item}</option>`; });
+        } else {
+            iS.disabled = true;
+            resetDiagnostic();
+        }
+    }
+
+   function runDiagnostic() {
+    const item = document.getElementById('iSelect').value;
+    if(!item) return;
+
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('diagnosticResults').classList.remove('hidden');
+    
+    const body = document.getElementById('diagBody');
+    body.innerHTML = '';
+
+    // Sort: Incomplete items first
+    const sortedData = [...prerequisites].sort((a, b) => b.is_incomplete - a.is_incomplete);
+
+    sortedData.forEach((p) => {
+        const row = document.createElement('tr');
+        
+        // Red background tint for incomplete rows
+        if (p.is_incomplete) {
+            row.className = "bg-red-50/50 hover:bg-red-100/50 transition-colors";
+        } else {
+            row.className = "hover:bg-slate-50/50 transition-colors";
+        }
+
+        row.innerHTML = `
+            <td>
+                <div class="status-dot mx-auto">
+                    ${p.is_incomplete 
+                        ? '<i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>' 
+                        : '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 fill-emerald-50"></i>'}
+                </div>
+            </td>
+            <td><div class="font-bold text-slate-700">${p.name}</div></td>
+            <td class="text-slate-500 font-medium">${p.is_incomplete ? p.missing_msg : p.active_msg} for ${item}</td>
+            <td class="text-center">
+                ${p.is_incomplete 
+                    ? `<button class="incomplete-btn-red" onclick="customPrompt('Fixing ${p.name}...')">Incomplete</button>` 
+                    : `<div class="complete-label justify-center text-emerald-600 font-bold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Completed</div>`}
+            </td>
+        `;
+        body.appendChild(row);
+    });
+    lucide.createIcons();
+}
+
+    function customPrompt(msg) {
+        // Replacing browser alert with a clean console log or custom UI if needed
+        console.log(msg);
+    }
+
+    function resetDiagnostic() {
+        document.getElementById('emptyState').classList.remove('hidden');
+        document.getElementById('diagnosticResults').classList.add('hidden');
+    }
+
+    function switchView(viewName) {
+        document.getElementById('dashboardView').classList.add('hidden-view');
+        document.getElementById('reportsView').classList.add('hidden-view');
+        document.getElementById('inventoryStatusReportView').classList.add('hidden-view');
+        
+        document.getElementById('nav-dashboard').classList.remove('active');
+        document.getElementById('nav-reports').classList.remove('active');
+
+        if (viewName === 'reports') {
+            document.getElementById('reportsView').classList.remove('hidden-view');
+            document.getElementById('nav-reports').classList.add('active');
+        } else if (viewName === 'dashboard') {
+            document.getElementById('dashboardView').classList.remove('hidden-view');
+            document.getElementById('nav-dashboard').classList.add('active');
+        } else if (viewName === 'reports-inventory-status') {
+            document.getElementById('inventoryStatusReportView').classList.remove('hidden-view');
+            document.getElementById('nav-reports').classList.add('active');
+            resetDiagnostic();
+        }
+        lucide.createIcons();
+    }
+
+    window.onload = () => switchView('reports');
+</script>
+</body>
+</html>
