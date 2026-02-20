@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Operations Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+	   input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+        
+        body {
+    font-family: 'Noto Sans', sans-serif;
+    background-color: #f8fafc;
+    height: 100vh;
+    overflow: hidden;
+    color: #1e293b;
+    font-size: 14px; /* Default size 12px se 14px kar di */
+}
+
+        /* Custom Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
+
+        .chart-bar { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .kpi-card { border-top-width: 4px; transition: all 0.2s ease-in-out; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+
+        .data-row {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.1s;
+        }
+        .data-row:hover { background-color: #fcfdfe; }
+
+        .section-sub-header {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #64748b; 
+            background-color: #f8fafc; 
+            padding: 12px 16px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Filter Controls */
+        .filter-label { font-size: 12px; font-weight: 800; color: #94a3b8; margin-right: 8px; }
+        .filter-input-wrapper {
+            background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px;
+            display: flex; align-items: center; gap: 8px; min-width: 140px;
+        }
+        .filter-input-wrapper input[type="date"], 
+        .filter-input-wrapper select {
+            border: none; outline: none; background: transparent; font-size: 11px;
+            font-weight: 600; color: #475569; width: 100%; cursor: pointer; appearance: none;
+        }
+        .view-btn {
+            background-color: #00a884; color: white; padding: 6px 28px; border-radius: 6px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .view-btn:hover { background-color: #008f70; }
+
+        /* Interactive Graph Elements */
+        .hover-line { stroke: #e2e8f0; stroke-width: 1; stroke-dasharray: 4; pointer-events: none; }
+        #chartTooltip { pointer-events: none; transition: all 0.05s ease-out; }
+        .line-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: dash 2s ease-in-out forwards; }
+        @keyframes dash { to { stroke-dashoffset: 0; } }
+
+        #analysisModal { transition: opacity 0.2s ease-out; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; }
+		
+		/* Select box aur Date input ki height match karne ke liye */
+.filter-input-wrapper {
+    background: white; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px; 
+    padding: 0 10px; /* Vertical padding 0 kiya */
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    min-width: 140px;
+    height: 38px; /* Fixed height for consistency */
+}
+
+/* Dropdown ke liye specific class */
+.custom-select-height {
+    height: 38px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 32px;
+}
+
+/* Sidebar stability aur Top Corner alignment */
+aside {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 64px; 
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    background-color: #0f172a;
+    /* padding-top hata diya gaya hai taaki logo corner se chipak jaye */
+}
+
+aside:hover {
+    width: 260px; 
+}
+
+/* Logo Area Update: Height ko header ke barabar (56px) kiya aur gap zero kiya */
+.sidebar-logo-area {
+    height: 56px; /* Header height (h-14) ke barabar */
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    margin-bottom: 4px; /* Dashboard se gap bilkul minimal kar diya */
+    background-color: #1e293b; /* Reference image jaisa thoda light color */
+}
+
+.logo-box {
+    width: 32px; 
+    height: 32px;
+    background-color: #2563eb;
+    border-radius: 6px; /* Thoda kam round (Reference image style) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Icons aur Text alignment - Height thodi kam ki hai professional look ke liye */
+.menu-item {
+    display: flex;
+    align-items: center;
+    height: 44px; /* Tighter spacing like reference image */
+    padding: 0 20px; 
+    color: #94a3b8;
+    transition: all 0.2s;
+    border-left: 3px solid transparent; /* Border thoda patla kiya */
+    text-decoration: none;
+}
+
+.menu-item i, .menu-item svg {
+    width: 20px; /* Thoda chhota icon like professional dashboards */
+    min-width: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.menu-text {
+    opacity: 0;
+    margin-left: 14px;
+    font-size: 13px;
+    font-weight: 400; /* Medium font weight */
+    transition: opacity 0.2s ease;
+}
+
+aside:hover .menu-text {
+    opacity: 1;
+}
+
+/* Highlight style updated to match image */
+.menu-item:hover, .menu-item.active {
+    background-color: rgba(59, 130, 246, 0.1); /* Subtle blue tint */
+    color: white;
+    border-left-color: #3b82f6;
+}
+/* Axes labels ko prominent banane ke liye */
+.axis-label {
+    fill: #64748b !important; /* Slate-500 for better contrast */
+    font-weight: 700 !important; /* Bold font */
+    font-size: 10px !important;
+}
+
+/* Grid lines ko thoda clear karne ke liye */
+.grid-line {
+    stroke: #e2e8f0; /* Slate-200 */
+    stroke-width: 1;
+    stroke-dasharray: 4;
+}
+
+/* Container and Bar Styling */
+.dashboard-card-styled {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+}
+
+.bar-container-styled {
+    height: 24px; /* Thoda sleek height */
+    background-color: #f8fafc;
+    border-radius: 4px;
+    margin-left: 90px;
+    position: relative;
+}
+
+.bar-fill-styled {
+    height: 100%;
+    border-radius: 0 4px 4px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.label-fixed-width {
+    width: 85px;
+    font-weight: 800;
+    font-size: 11px;
+    color: #64748b;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* AI Section Magic Look */
+.ai-gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    z-index: 0;
+}
+.ai-gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -2px; /* Border thickness */
+    background: linear-gradient(45deg, #0ea5e9, #6366f1, #a855f7, #0ea5e9);
+    background-size: 400% 400%;
+    z-index: -1;
+    border-radius: 18px;
+    animation: gradientRotate 6s linear infinite;
+    opacity: 0.3;
+}
+@keyframes gradientRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.ai-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+  <aside class="h-screen sticky top-0 bg-[#0f172a] z-30 shadow-xl flex flex-col">
+    <div class="sidebar-logo-area">
+        <div class="logo-box">
+            <i data-lucide="layout-grid" class="text-white w-4 h-4"></i>
+        </div>
+        <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider"></span>
+    </div>
+
+    <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar pt-1">
+        <a href="#" class="menu-item active">
+            <i data-lucide="home"></i>
+            <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="Inv-Invoice.html" class="menu-item">
+            <i data-lucide="file-text"></i>
+            <span class="menu-text">Invoices</span>
+        </a>
+        <a href="Inv-CreditMemo.html" class="menu-item">
+            <i data-lucide="wallet"></i>
+            <span class="menu-text">Credit Memo</span>
+        </a>
+        <a href="Inv-Transfers.html" class="menu-item">
+            <i data-lucide="repeat"></i>
+            <span class="menu-text">Transfer</span>
+        </a>
+        <a href="Inv-Inventory.html" class="menu-item">
+            <i data-lucide="clipboard-check"></i>
+            <span class="menu-text">Inventory</span>
+        </a>
+        <a href="Inv-Sales.html" class="menu-item">
+            <i data-lucide="pie-chart"></i>
+            <span class="menu-text">Actual Sales</span>
+        </a>
+        <a href="Inv-Sales.html" class="menu-item">
+            <i data-lucide="trending-up"></i>
+            <span class="menu-text">Forecasted Sales</span>
+        </a>
+        <a href="Inv-MenuMix.html" class="menu-item">
+            <i data-lucide="utensils"></i>
+            <span class="menu-text">Menu Mix</span>
+        </a>
+        <a href="Inv-OnHand.html" class="menu-item">
+            <i data-lucide="package"></i>
+            <span class="menu-text">On Hand</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i data-lucide="users"></i>
+            <span class="menu-text">Employees</span>
+        </a>
+        <a href="Inv-Waste.html" class="menu-item">
+            <i data-lucide="trash-2"></i>
+            <span class="menu-text">Waste</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i data-lucide="truck"></i>
+            <span class="menu-text">Supplier Item Price List</span>
+        </a>
+        
+        <div class="mt-auto border-t border-slate-800/50 pt-2 mb-4">
+            <a href="Inv-Reports.html" class="menu-item flex justify-between">
+                <div class="flex items-center">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span class="menu-text">Reports</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-3 h-3 menu-text opacity-0"></i>
+            </a>
+           
+        </div>
+    </nav>
+</aside>
+
+    <main class="flex-1 flex flex-col min-w-0 h-full">
+        <!-- Top Nav -->
+        <header class="h-14 bg-[#0f172a] text-white flex items-center justify-between px-6 border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center space-x-6 text-[12px]">
+                <div class="flex items-center space-x-2"><span class="font-semibold uppercase text-slate-200">My Apps</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i></div>
+                <div class="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded cursor-pointer">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i><span class="font-medium">Costa Mesa</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-xs font-semibold">
+                        <i data-lucide="cloud-sun" class="w-4 h-4 text-yellow-400"></i><span>09:20<sup class="text-[8px] opacity-70">A</sup></span>
+                    </div>
+                    <span class="text-slate-500 text-[9px] font-bold uppercase tracking-widest">America/Los Angeles</span>
+                </div>
+                <div class="flex items-center space-x-3 bg-slate-800 px-3 py-1 rounded border border-slate-700 cursor-pointer">
+                    <i data-lucide="building-2" class="w-3 h-3 text-blue-400"></i><span class="font-bold text-[10px]">CORPORATE</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </div>
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-full ring-2 ring-slate-700 p-0.5 bg-slate-600">
+            </div>
+        </header>
+
+        <!-- Filter Controls -->
+        <div class="p-1 space-y-1 flex-shrink-0">
+           <div class="p-1 space-y-1 flex-shrink-0">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+            <div class="relative w-40">
+                <select
+                    id="inventoryType"
+                    class="custom-select-height w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 text-[12px] font-semibold text-slate-700 shadow-sm
+                           hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer">
+                    
+                    <option value="weekly">Weekly</option>
+					<option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 text-[8px]">
+                    ▼
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <span class="filter-label uppercase tracking-tighter">Select Date:</span>
+                <div class="filter-input-wrapper w-44">
+                    <input type="date" value="2026-01-01" class="uppercase">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+            </div>
+
+            <button id="viewBtn" class="view-btn">View</button>
+        </div>
+
+        <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+            <i data-lucide="clock" class="w-4 h-4 text-slate-300"></i>
+            <div class="text-right">
+                <div class="text-[10px] text-slate-400 uppercase font-bold leading-none tracking-tighter">Last Updated At</div>
+                <div class="text-[12px] font-bold text-slate-600 mt-1 uppercase">02/03/2026 11:47 PM</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- KPI Tiles with Subtle Gradients -->
+            <div class="grid grid-cols-7 gap-3 text-white">
+    <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Sales $', 'dollar-sign', 'yellow')">
+    <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">
+        Sales $ <i data-lucide="dollar-sign" class="w-4 h-4 text-white"></i>
+    </div>
+    <div id="salesKPI" class="text-xl font-black mt-2">$ 142,580</div>
+    
+    <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform">
+        <i data-lucide="trending-up" class="w-4 h-4 text-white"></i>
+    </div>
+</div>
+
+    <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Inventory $', 'package', 'emerald')">
+        <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">Inventory $ <i data-lucide="package" class="w-4 h-4 text-white"></i></div>
+        <div id="inventoryKPI" class="text-xl font-bold mt-2">$ 17,639.24</div>
+        <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-400 to-indigo-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Food Cost %', 'percent', 'purple')">
+        <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">Actual Cost % <span class="text-white opacity-70 font-bold text-[12px]">%</span></div>
+        <div id="foodCostKPI" class="text-xl font-bold mt-2">27.40 %</div>
+        <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+    </div>
+
+    <div class="bg-gradient-to-br from-blue-400 to-blue-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Weekly Deliveries', 'truck', 'blue')">
+        <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">Ideal Cost % <i data-lucide="truck" class="w-4 h-4 text-white"></i></div>
+        <div id="weeklyKPI" class="text-xl font-bold mt-2">31.10 %</div>
+        <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+    </div>
+
+    <div class="bg-gradient-to-br from-rose-400 to-red-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Variance %', 'trending-down', 'rose')">
+        <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">Variance % <i data-lucide="trending-down" class="w-4 h-4 text-white"></i></div>
+        <div id="varianceKPI" class="text-xl font-bold mt-2">-3.70 %</div>
+        <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-down" class="w-4 h-4 text-white"></i></div>
+    </div>
+
+	<div class="bg-gradient-to-br from-slate-400 to-slate-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" 
+     onclick="toggleAnalysisModal(true, 'Waste $', 'clipboard-list', 'slate')">
+    <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">
+        Waste $ <i data-lucide="clipboard-list" class="w-4 h-4 text-white"></i>
+    </div>
+    <div id="expenseKPI" class="text-xl font-bold mt-2">$ 8,432</div>
+    <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+</div>
+
+    <div class="bg-gradient-to-br from-sky-400 to-cyan-600 p-4 rounded-2xl shadow-md kpi-card border-none relative cursor-pointer group" onclick="toggleAnalysisModal(true, 'Menu Mix Profit %', 'pie-chart', 'sky')">
+        <div class="text-[13px] font-bold text-white/80 uppercase tracking-widest flex justify-between">Menu Mix Profit % <i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+        <div id="profitKPI" class="text-xl font-bold mt-2">24.50 %</div>
+        <div class="absolute bottom-3 right-3 p-1 bg-white/20 rounded backdrop-blur-sm group-hover:scale-110 transition-transform"><i data-lucide="trending-up" class="w-4 h-4 text-white"></i></div>
+    </div>
+</div>
+        </div>
+
+        <!-- Dashboard Main Sections -->
+        <div class="flex-1 px-4 pb-4 overflow-hidden min-h-0">
+            <div class="grid grid-cols-2 grid-rows-2 gap-4 h-full">
+                
+                <!-- 1. NEEDING ACTION (Data expansion) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full text-slate-800 overflow-hidden">
+    <div class="p-3 border-b border-slate-100 flex items-center space-x-3 bg-slate-50/50 rounded-t-2xl flex-shrink-0">
+        <div class="p-2 bg-orange-100 text-orange-600 rounded-lg shadow-inner"><i data-lucide="bell" class="w-4 h-4"></i></div>
+        <h2 class="font-bold text-slate-700 uppercase tracking-widest text-[14px]">Needing Action</h2>
+        <span class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full ring-2 ring-blue-100">4</span>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto custom-scrollbar" style="max-height: 380px;"> 
+        <div class="section-sub-header">Un-Finalized Inventory</div>
+        <div class="px-2">
+            <div class="data-row flex items-center justify-between py-3 text-[12px]">
+                <div class="w-1/3"><div class="font-bold uppercase tracking-tight">Count: Daily</div><div class="text-slate-400 font-medium text-[11px]">Inv. Date: 01/23/2026</div></div>
+                <div class="w-1/3 text-center font-semibold text-slate-500">Inv. Value: $ 12,861.00</div>
+                <div class="w-1/3 flex items-center justify-end space-x-3 text-emerald-500"><span class="text-slate-500 font-semibold text-[12px]">Sales: $ 26,547.00</span><i data-lucide="eye" class="w-4 h-4 cursor-pointer"></i><i data-lucide="thumbs-up" class="w-4 h-4 cursor-pointer"></i></div>
+            </div>
+            <div class="data-row flex items-center justify-between py-3 text-[12px]">
+                <div class="w-1/3"><div class="font-bold uppercase tracking-tight">Count: Weekly</div><div class="text-slate-400 font-medium text-[11px]">Inv. Date: 01/16/2026</div></div>
+                <div class="w-1/3 text-center font-semibold text-slate-500">Inv. Value: $ 16,861.65</div>
+                <div class="w-1/3 flex items-center justify-end space-x-3 text-emerald-500"><span class="text-slate-500 font-semibold text-[12px]">Sales: $ 72,918.00</span><i data-lucide="eye" class="w-4 h-4 cursor-pointer"></i><i data-lucide="thumbs-up" class="w-4 h-4 cursor-pointer"></i></div>
+            </div>
+            <div class="data-row flex items-center justify-between py-3 text-[12px]">
+                <div class="w-1/3"><div class="font-bold uppercase tracking-tight">Count: Daily</div><div class="text-slate-400 font-medium text-[11px]">Inv. Date: 01/24/2026</div></div>
+                <div class="w-1/3 text-center font-semibold text-slate-500">Inv. Value: $ 4,110.00</div>
+                <div class="w-1/3 flex items-center justify-end space-x-3 text-emerald-500"><span class="text-slate-500 font-semibold text-[12px]">Sales: $ 31,110.00</span><i data-lucide="eye" class="w-4 h-4 cursor-pointer"></i><i data-lucide="thumbs-up" class="w-4 h-4 cursor-pointer"></i></div>
+            </div>
+            <div class="data-row flex items-center justify-between py-3 text-[12px]">
+                <div class="w-1/3"><div class="font-bold uppercase tracking-tight">Count: Monthly</div><div class="text-slate-400 font-medium text-[11px]">Inv. Date: 12/31/2025</div></div>
+                <div class="w-1/3 text-center font-semibold text-slate-500">Inv. Value: $ 42,670.00</div>
+                <div class="w-1/3 flex items-center justify-end space-x-3 text-emerald-500"><span class="text-slate-500 font-semibold text-[12px] font-bold">Sales: $ 158,400.00</span><i data-lucide="eye" class="w-4 h-4 cursor-pointer"></i><i data-lucide="thumbs-up" class="w-4 h-4 cursor-pointer"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+ <!-- 2. Top 10 Items with Lowest Days On Hand -->
+				<div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col min-h-0 text-slate-800 relative overflow-hidden h-full">
+    <div class="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 z-30">
+        <div class="flex items-center space-x-3">
+            <div id="toggleIconBox" class="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg shadow-inner">
+                <i data-lucide="pie-chart" class="w-3.5 h-3.5" id="viewIcon"></i>
+            </div>
+            <h2 id="toggleHeaderTitle" class="font-bold text-slate-700 uppercase tracking-widest text-[14px]">Inventory On Hand</h2>
+        </div>
+        
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 w-24 relative cursor-pointer select-none" onclick="toggleInventoryView()">
+            <div id="toggleBg" class="absolute inset-y-0.5 left-0.5 w-[calc(50%-1px)] bg-white rounded-full shadow-sm transition-all duration-300 border border-slate-100"></div>
+            <div class="relative z-10 flex-1 text-center text-[12px] font-black uppercase tracking-tighter" id="text-inv">Inv</div>
+            <div class="relative z-10 flex-1 text-center text-[12px] font-black uppercase tracking-tighter text-slate-400" id="text-days">Days</div>
+        </div>
+    </div>
+
+    <div class="flex-1 relative w-full h-full flex overflow-hidden bg-white">
+        <div id="inventoryOnHandView" class="absolute inset-0 flex items-center justify-center p-6 transition-all duration-500 opacity-100 z-20">
+            
+            <div class="flex-1 hidden lg:block"></div>
+
+            <div class="relative w-64 h-64 flex-shrink-0">
+                <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f8fafc" stroke-width="10" />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#8da2fb" stroke-width="14" stroke-dasharray="70 238.7" class="cursor-pointer hover:stroke-[16px] transition-all" 
+                        onclick="updateDonutCenter('BEVERAGE', '$4,752')" onmousemove="showChartTip(event, 'BEVERAGE COST: 27.87%')" onmouseout="hideChartTip()" />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f9b384" stroke-width="14" stroke-dasharray="85 238.7" stroke-dashoffset="-70" class="cursor-pointer hover:stroke-[16px] transition-all" 
+                        onclick="updateDonutCenter('CHEESE', '$5,808')" onmousemove="showChartTip(event, 'CHEESE COST: 33.67%')" onmouseout="hideChartTip()" />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#63c5b5" stroke-width="14" stroke-dasharray="25 238.7" stroke-dashoffset="-155" class="cursor-pointer hover:stroke-[16px] transition-all" 
+                        onclick="updateDonutCenter('DAIRY', '$1,760')" onmousemove="showChartTip(event, 'DAIRY COST: 5.69%')" onmouseout="hideChartTip()" />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#d64f73" stroke-width="14" stroke-dasharray="58.7 238.7" stroke-dashoffset="-180" class="cursor-pointer hover:stroke-[16px] transition-all" 
+                        onclick="updateDonutCenter('MEAT', '$5,280')" onmousemove="showChartTip(event, 'MEAT COST: 10.84%')" onmouseout="hideChartTip()" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                    <span id="centerLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none transition-all">Total</span>
+                    <span id="centerValue" class="text-3xl font-black text-slate-800 tracking-tighter mt-1 transition-all">$17.6K</span>
+                    <div class="mt-2 pointer-events-auto">
+                        <button onclick="updateDonutCenter('Total', '$17.6K')" class="text-[7px] font-bold text-blue-500 uppercase hover:underline">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex justify-end pr-4">
+                <div class="flex flex-col space-y-4 pl-10 border-l border-slate-50 min-w-[160px]">
+                    <div class="flex items-center space-x-3 cursor-pointer group" onclick="updateDonutCenter('BEVERAGE', '$4,752')">
+                        <span class="w-3 h-3 rounded bg-[#8da2fb]"></span>
+                        <div class="flex flex-col">
+                            <span class="text-[12px] font-black text-slate-700 leading-none group-hover:text-blue-500 transition-colors">BEVERAGE</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">27% SHARE</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 cursor-pointer group" onclick="updateDonutCenter('CHEESE', '$5,808')">
+                        <span class="w-3 h-3 rounded bg-[#f9b384]"></span>
+                        <div class="flex flex-col">
+                            <span class="text-[12px] font-black text-slate-700 leading-none group-hover:text-blue-500 transition-colors">CHEESE</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">33% SHARE</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 cursor-pointer group" onclick="updateDonutCenter('DAIRY', '$1,760')">
+                        <span class="w-3 h-3 rounded bg-[#63c5b5]"></span>
+                        <div class="flex flex-col">
+                            <span class="text-[12px] font-black text-slate-700 leading-none group-hover:text-blue-500 transition-colors">DAIRY</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">10% SHARE</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 cursor-pointer group" onclick="updateDonutCenter('MEAT', '$5,280')">
+                        <span class="w-3 h-3 rounded bg-[#d64f73]"></span>
+                        <div class="flex flex-col">
+                            <span class="text-[12px] font-black text-slate-700 leading-none group-hover:text-blue-500 transition-colors">MEAT</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase mt-1">30% SHARE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       <div id="daysOnHandView" class="absolute inset-0 flex flex-col p-4 transition-all duration-500 opacity-0 z-10 pointer-events-none translate-y-4 bg-white">
+    <div class="flex justify-end items-start mb-1"> 
+        <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Days Left</span>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col justify-between py-1 relative overflow-y-auto custom-scrollbar pr-2">
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Tomato</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 36%">
+                    <span class="text-[9px] font-black text-white pr-2">1.8 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Cheese</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 46%">
+                    <span class="text-[9px] font-black text-white pr-2">2.3 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Milk</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 62%">
+                    <span class="text-[9px] font-black text-white pr-2">3.1 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Bread</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 76%">
+                    <span class="text-[9px] font-black text-white pr-2">3.8 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Lettuce</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 90%">
+                    <span class="text-[9px] font-black text-white pr-2">4.5 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Onion</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 92%">
+                    <span class="text-[9px] font-black text-white pr-2">4.6 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Chicken</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 94%">
+                    <span class="text-[9px] font-black text-white pr-2">4.7 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Butter</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 96%">
+                    <span class="text-[9px] font-black text-white pr-2">4.8 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Egg</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 98%">
+                    <span class="text-[9px] font-black text-white pr-2">4.9 D</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative flex items-center h-7 group mb-1">
+            <span class="label-fixed-width uppercase font-extrabold text-slate-700 text-[10px]">Cream</span>
+            <div class="flex-1 ml-[90px] relative h-5">
+                <div class="bar-fill-styled bg-gradient-to-r from-blue-400 to-blue-600 horizontal-bar shadow-sm h-full" style="width: 100%">
+                    <span class="text-[9px] font-black text-white pr-2">5.0 D</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between mt-1 ml-[90px] text-[10px] font-black text-slate-500 border-t-2 border-slate-200 pt-1">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5+</span>
+    </div>
+</div>
+        <div id="chartTooltipBox" class="fixed hidden bg-white border-2 border-emerald-400 text-slate-800 px-3 py-1.5 rounded shadow-xl z-[9999] pointer-events-none transform -translate-y-full -translate-x-1/2">
+            <div class="text-[10px] font-black uppercase whitespace-nowrap tracking-tight" id="tooltipText">DATA</div>
+            <div class="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-r-2 border-b-2 border-emerald-400 transform rotate-45"></div>
+        </div>
+    </div>
+</div>
+
+               
+ <!-- 3. VARIANCE SUMMARY (Full 10 Dataset) -->
+
+			   
+			   
+			   
+			   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col min-h-0 relative text-slate-800">
+    <div class="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-2xl flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-purple-100 text-purple-600 rounded-lg"><i data-lucide="git-branch" class="w-4 h-4"></i></div>
+            <h2 class="font-bold text-slate-700 uppercase tracking-widest text-[14px]">Variance Summary</h2>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-1.5 text-[10px] font-bold uppercase text-indigo-700"><span class="w-2 h-2 rounded-full bg-[#4f46e5]"></span><span>Actual</span></div>
+            <div class="flex items-center space-x-1.5 text-[10px] font-bold uppercase text-green-600"><span class="w-2 h-2 rounded-full bg-[#22c55e]"></span><span>Ideal</span></div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-0">
+        <div class="section-sub-header !py-1.5 flex justify-between items-center bg-slate-100/50 px-3">
+            <span class="text-slate-900 font-extrabold">Top 5 Variance</span>
+        </div>
+
+        <div class="px-3">
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">1. Beef Steak Skirt</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 75%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$229</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 45%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$164</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-rose-600 font-black tracking-tighter">$ -65 | -40%</span></div>
+            </div>
+            
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">2. Oysters</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 40%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$105</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 15%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$52</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-rose-600 font-black tracking-tighter">$ -53 | -103%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">3. Shrimp 16/20</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 55%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$184</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 38%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$140</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-rose-600 font-black tracking-tighter">$ -44 | -31%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">4. Salmon Fillet</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 80%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$412</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 72%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$380</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-rose-600 font-black tracking-tighter">$ -32 | -12%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">5. Avocado Hass</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 65%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$310</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 40%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$190</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-rose-600 font-black tracking-tighter">$ -120 | -38%</span></div>
+            </div>
+        </div>
+
+        <div class="section-sub-header !py-1.5 flex justify-between items-center mt-2 bg-slate-100/50 px-3">
+            <span class="text-slate-900 font-extrabold">Bottom 5 Variance</span>
+        </div>
+
+        <div class="px-3 pb-2">
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">1. Lobster Tail</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 90%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$628</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 95%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$680</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-emerald-600 font-black tracking-tighter">$ 52 | +7%</span></div>
+            </div>
+            
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">2. Lamb Chop</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 60%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$280</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 65%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$300</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-emerald-600 font-black tracking-tighter">$ 20 | +5%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">3. Sea Bass</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 70%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$450</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 72%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$470</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-emerald-600 font-black tracking-tighter">$ 80 | +4%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group border-b border-slate-50">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">4. Ribeye Steak</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 85%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$890</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 88%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$920</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-emerald-600 font-black tracking-tighter">$ 30 | +3%</span></div>
+            </div>
+
+            <div class="data-row py-1.5 flex items-center group">
+                <div class="w-1/4 pr-2"><div class="text-[12px] font-bold text-slate-700 uppercase truncate">5. Tuna Tartare</div></div>
+                <div class="w-2/4 flex flex-col space-y-1">
+                    <div class="flex items-center"><div class="h-1.5 bg-[#4f46e5] rounded-full chart-bar" style="width: 40%"></div><span class="text-[11px] font-black text-slate-700 ml-1.5">$120</span></div>
+                    <div class="flex items-center"><div class="h-1.5 bg-[#22c55e] rounded-full chart-bar" style="width: 42%"></div><span class="text-[11px] font-black text-slate-600 ml-1.5">$130</span></div>
+                </div>
+                <div class="w-1/4 text-right"><span class="text-[12px] text-emerald-600 font-black tracking-tighter">$ 10 | +2%</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. AI ALERTS (Expanded Data - Full Match) -->
+   <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col min-h-0 text-slate-800">
+    <div class="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-2xl flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-sky-100 text-sky-600 rounded-lg shadow-inner"><i data-lucide="zap" class="w-4 h-4"></i></div>
+            <h2 class="font-bold text-slate-700 uppercase tracking-widest text-[14px]">AI Alerts</h2>
+            <span class="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full ring-2 ring-blue-100">12</span>
+        </div>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-0 custom-scrollbar">
+        
+        <div class="group">
+            <div onclick="toggleAlertSection('low-inventory', this)" class="cursor-pointer text-[11px] font-extrabold px-4 py-1.5 bg-blue-50/50 text-blue-600 uppercase tracking-wider flex items-center justify-between border-y border-blue-100/50 hover:bg-blue-100/30 transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="package-search" class="w-3 h-3"></i>
+                    <span>Low Inventory Alerts</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 transform rotate-180"></i>
+            </div>
+            <div id="low-inventory" class="p-4 space-y-4 overflow-hidden transition-all duration-300 max-h-[500px]">
+                <div class="data-row pb-3 flex justify-between items-start border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Burger Buns (Brioche)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Main Pantry</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-rose-500 font-bold text-[12px]">Critical: 12 Units</div>
+                        <div class="text-slate-400 text-[10px] font-bold">Min. Req: 50 Units</div>
+                    </div>
+                </div>
+                <div class="data-row pb-3 flex justify-between items-start border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Cooking Oil (Canola)</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">Dry Storage</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-orange-500 font-bold text-[12px]">Low: 2 Jars</div>
+                        <div class="text-slate-400 text-[10px] font-bold">Min. Req: 10 Jars</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="group">
+            <div onclick="toggleAlertSection('price-spikes', this)" class="cursor-pointer text-[11px] font-extrabold px-4 py-1.5 bg-rose-50/50 text-rose-600 uppercase tracking-wider flex items-center justify-between border-y border-rose-100/50 hover:bg-rose-100/30 transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-3 h-3"></i>
+                    <span>Supplier Price Spikes</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 transform rotate-180"></i>
+            </div>
+            <div id="price-spikes" class="p-4 space-y-4 overflow-hidden transition-all duration-300 max-h-[500px]">
+                <div class="data-row pb-3 flex justify-between items-start border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Avocado Hass 48CT</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">SYSCO</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-rose-500 font-bold text-[12px]">+36.4%</div>
+                        <div class="text-slate-400 text-[10px] font-bold">$42.5 → $58</div>
+                    </div>
+                </div>
+                <div class="data-row pb-3 flex justify-between items-start border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Wings Jumbo Raw</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">US FOODS</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-rose-500 font-bold text-[12px]">+15.5%</div>
+                        <div class="text-slate-400 text-[10px] font-bold">$85.2 → $98.45</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="group">
+            <div onclick="toggleAlertSection('food-warnings', this)" class="cursor-pointer text-[11px] font-extrabold px-4 py-1.5 bg-orange-50/50 text-orange-600 uppercase tracking-wider flex items-center justify-between border-y border-orange-100/50 hover:bg-orange-100/30 transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black">%</span>
+                    <span>Food Cost Warnings</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 transform rotate-180"></i>
+            </div>
+            <div id="food-warnings" class="p-4 space-y-4 overflow-hidden transition-all duration-300 max-h-[500px]">
+                <div class="data-row pb-3 flex justify-between items-start border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Signature Ribeye</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase">M-102</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-orange-500 font-bold text-[12px]">+3.7%</div>
+                        <div class="text-slate-400 text-[10px] font-bold">28.4% → 32.1%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="group">
+            <div onclick="toggleAlertSection('waste-items', this)" class="cursor-pointer text-[11px] font-extrabold px-4 py-1.5 bg-slate-50 text-slate-500 uppercase tracking-wider flex items-center justify-between border-y border-slate-100 hover:bg-slate-100/50 transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    <span>High Waste Items</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 transform rotate-180"></i>
+            </div>
+            <div id="waste-items" class="p-4 space-y-4 overflow-hidden transition-all duration-300 max-h-[500px]">
+                <div class="data-row pb-3 flex justify-between items-center border-b border-slate-50">
+                    <div>
+                        <div class="font-bold uppercase text-slate-700 tracking-tight text-[12px]">Spring Mix Lettuce</div>
+                        <div class="text-[9px] text-rose-500 font-bold uppercase">Expiration</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-slate-700 font-bold text-[12px]">$145.00</div>
+                        <div class="text-slate-400 text-[10px] font-bold">12 Lbs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                
+
+               
+                
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Interactive Analysis Modal -->
+    <div id="analysisModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-[2px] z-50 flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300">
+        <div class="bg-white w-[780px] rounded-[24px] shadow-2xl pointer-events-auto transform scale-95 transition-all duration-300 overflow-hidden" id="modalContainer">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-50 flex items-center justify-between bg-white">
+                <div class="flex items-center space-x-4">
+                    <div id="modalKpiIcon" class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+                    </div>
+                    <h2 id="modalKpiTitle" class="text-sm font-bold text-slate-800 tracking-tight uppercase">KPI Analysis</h2>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-slate-100 p-1 rounded-xl flex space-x-1 border border-slate-200">
+    <button onclick="switchTab('trend')" id="btn-trend" class="px-6 py-2 text-[10px] font-bold rounded-lg flex items-center space-x-2 transition-all">
+        <i data-lucide="line-chart" class="w-3.5 h-3.5"></i><span>Trend</span>
+    </button>
+    <button onclick="switchTab('breakdown')" id="btn-breakdown" class="px-6 py-2 text-[10px] font-bold rounded-lg flex items-center space-x-2 transition-all">
+        <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i><span>Breakdown</span>
+    </button>
+</div>
+                   <button type="button" 
+        onclick="toggleAnalysisModal(false)" 
+        class="relative z-[60] w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 transition-colors cursor-pointer pointer-events-auto">
+    <i data-lucide="x" class="w-5 h-5"></i>
+</button>
+                </div>
+            </div>
+            
+            <div class="p-8 min-h-[460px] bg-white">
+                <!-- Trend Tab -->
+               <div id="tab-trend" class="tab-content active h-[340px] flex-col relative group">
+    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-600 font-bold">
+        <div class="border-b border-dashed border-slate-300 flex justify-between items-end pb-1">
+            <span id="yMax" class="bg-white/80 px-1 rounded shadow-sm">$150k</span>
+        </div>
+        <div class="border-b border-dashed border-slate-300 flex justify-between items-end pb-1">
+            <span id="yMidHigh" class="bg-white/80 px-1 rounded shadow-sm">$112k</span>
+        </div>
+        <div class="border-b border-dashed border-slate-300 flex justify-between items-end pb-1">
+            <span id="yMid" class="bg-white/80 px-1 rounded shadow-sm">$75k</span>
+        </div>
+        <div class="border-b border-dashed border-slate-300 flex justify-between items-end pb-1">
+            <span id="yLow" class="bg-white/80 px-1 rounded shadow-sm">$37k</span>
+        </div>
+        <div class="flex justify-between items-end">
+            <span class="bg-white/80 px-1 rounded shadow-sm">$0</span>
+        </div>
+    </div>
+
+    <div class="flex-1 relative z-10 pt-4" onmousemove="handleMouseMove(event)" onmouseleave="hideTooltip()">
+        <svg viewBox="0 0 600 240" class="w-full h-full overflow-visible" id="trendSvg">
+            <path id="trendPath" d="M 0 230 C 50 180 80 50 120 100 C 160 150 190 230 240 230 L 320 230 L 400 230 C 440 180 480 80 520 100 C 560 120 580 40 600 30" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" class="line-path" />
+            <line id="guideLine" x1="-10" x2="-10" y1="0" y2="240" class="hover-line" style="visibility: hidden; stroke: #94a3b8; stroke-dasharray: 4;" />
+            <g id="chartTooltip" style="visibility: hidden;">
+                <rect width="80" height="32" rx="8" fill="#ffffff" x="-40" y="-42" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2))" />
+                <text id="tooltipValue" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="800" y="-22">$0</text>
+                <circle r="6" fill="#10b981" stroke="white" stroke-width="3" id="tooltipDot" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="flex justify-between mt-6 text-[10px] font-bold text-slate-700 uppercase tracking-tight px-1">
+        <span>Dec 22</span><span>Dec 23</span><span>Dec 29</span><span>Jan 05</span><span>Jan 07</span><span>Jan 08</span><span>Jan 14</span>
+    </div>
+</div>
+
+                <!-- Breakdown Tab -->
+                <div id="tab-breakdown" class="tab-content h-[340px] items-center justify-around px-10">
+    <div class="relative w-72 h-72 flex items-center justify-center">
+        <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#f1f5f9" stroke-width="18" />
+            <circle id="donutSeg1" cx="50" cy="50" r="38" fill="none" stroke-width="18" class="cursor-pointer transition-all hover:stroke-[20px]" />
+            <circle id="donutSeg2" cx="50" cy="50" r="38" fill="none" stroke-width="18" class="cursor-pointer transition-all hover:stroke-[20px]" />
+            <circle id="donutSeg3" cx="50" cy="50" r="38" fill="none" stroke-width="18" class="cursor-pointer transition-all hover:stroke-[20px]" />
+            <circle id="donutSeg4" cx="50" cy="50" r="38" fill="none" stroke-width="18" class="cursor-pointer transition-all hover:stroke-[20px]" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+            <span id="modalDonutLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">TOTAL</span>
+            <span id="modalDonutValue" class="text-3xl font-black text-slate-800 tracking-tighter mt-1">$17.6K</span>
+            <div class="mt-2 pointer-events-auto">
+                <button onclick="resetModalDonut()" class="text-[8px] font-bold text-blue-500 uppercase hover:underline">Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex flex-col justify-center min-w-[200px] border-l border-slate-50 pl-10" id="modalLegend">
+        </div>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const kpiData = {
+    'Sales $': { 
+        color: '#eab308', yLabels: ['$150k', '$112k', '$75k', '$37k'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '25%', value: '$35,645', color: '#8da2fb' },
+            { label: 'MEAT', percent: '35%', value: '$49,903', color: '#d64f73' },
+            { label: 'CHEESE', percent: '30%', value: '$42,774', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '$14,258', color: '#63c5b5' }
+        ] 
+    },
+    'Inventory $': { 
+        color: '#10b981', yLabels: ['$18k', '$13.5k', '$9k', '$4.5k'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '27%', value: '$4,752', color: '#8da2fb' },
+            { label: 'MEAT', percent: '30%', value: '$5,280', color: '#d64f73' },
+            { label: 'CHEESE', percent: '33%', value: '$5,808', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '$1,760', color: '#63c5b5' }
+        ] 
+    },
+    'Food Cost %': { 
+        color: '#a855f7', yLabels: ['40%', '30%', '20%', '10%'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '20%', value: '5.48%', color: '#8da2fb' },
+            { label: 'MEAT', percent: '45%', value: '12.33%', color: '#d64f73' },
+            { label: 'CHEESE', percent: '25%', value: '6.85%', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '2.74%', color: '#63c5b5' }
+        ] 
+    },
+    'Ideal Cost %': { 
+        color: '#3b82f6', yLabels: ['40%', '30%', '20%', '10%'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '22%', value: '6.84%', color: '#8da2fb' },
+            { label: 'MEAT', percent: '40%', value: '12.44%', color: '#d64f73' },
+            { label: 'CHEESE', percent: '28%', value: '8.71%', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '3.11%', color: '#63c5b5' }
+        ] 
+    },
+    'Variance %': { 
+        color: '#f43f5e', yLabels: ['5%', '2%', '0%', '-2%'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '15%', value: '-0.55%', color: '#8da2fb' },
+            { label: 'MEAT', percent: '50%', value: '-1.85%', color: '#d64f73' },
+            { label: 'CHEESE', percent: '25%', value: '-0.92%', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '-0.37%', color: '#63c5b5' }
+        ] 
+    },
+    'Waste $': { 
+        color: '#64748b', yLabels: ['$10k', '$7k', '$5k', '$2k'], 
+        categories: [
+            { label: 'BEVERAGE', percent: '12%', value: '$1,011', color: '#8da2fb' },
+            { label: 'MEAT', percent: '58%', value: '$4,890', color: '#d64f73' },
+            { label: 'CHEESE', percent: '20%', value: '$1,686', color: '#f9b384' },
+            { label: 'DAIRY', percent: '10%', value: '$843', color: '#63c5b5' }
+        ] 
+    },
+    'Menu Mix Profit %': { 
+        color: '#0ea5e9', yLabels: ['30%', '20%', '10%', '5%'], 
+        categories: [
+           { label: 'BEVERAGE', percent: '30%', value: '$13,500', color: '#8da2fb' },
+           { label: 'MEAT', percent: '25%', value: '$11,250', color: '#d64f73' },
+           { label: 'CHEESE', percent: '35%', value: '$15,750', color: '#f9b384' },
+           { label: 'DAIRY', percent: '10%', value: '$4,500', color: '#63c5b5' }
+
+        ] 
+    }
+};
+
+        function handleMouseMove(e) {
+    const svg = document.getElementById('trendSvg');
+    const path = document.getElementById('trendPath');
+    const guide = document.getElementById('guideLine');
+    const tooltip = document.getElementById('chartTooltip');
+    const tooltipValue = document.getElementById('tooltipValue');
+    const title = document.getElementById('modalKpiTitle').innerText;
+
+    // SVG coordinate system ke hisaab se mouse position nikalein
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+    const pathLen = path.getTotalLength();
+    let low = 0, high = pathLen;
+    
+    // Path par sabse kareebi point dhundhne ke liye binary search
+    while (high - low > 1) {
+        const mid = (low + high) / 2;
+        const p = path.getPointAtLength(mid);
+        if (p.x < loc.x) low = mid;
+        else high = mid;
+    }
+
+    const snap = path.getPointAtLength(low);
+    
+    // Elements update karein
+    guide.setAttribute('x1', snap.x);
+    guide.setAttribute('x2', snap.x);
+    guide.style.visibility = 'visible';
+    
+    tooltip.style.visibility = 'visible';
+    tooltip.setAttribute('transform', `translate(${snap.x}, ${snap.y})`);
+
+    // Dynamic Value Calculation
+    // Y-axis height (240) se inverted value nikaali jati hai
+    let rawVal = (240 - snap.y); 
+    let displayVal = "";
+
+    // KPI type ke hisaab se formatting fix karein
+    if (title.includes('%')) {
+        displayVal = (rawVal / 6).toFixed(2) + " %"; // Percent formatting
+    } else {
+        // Sales ya Inventory ke liye dollar formatting
+        let multiplier = title.includes('Sales') ? 600 : 80; 
+        displayVal = "$ " + Math.round(rawVal * multiplier).toLocaleString();
+    }
+
+    tooltipValue.textContent = displayVal;
+}
+
+        function hideTooltip() { document.getElementById('guideLine').style.visibility = 'hidden'; document.getElementById('chartTooltip').style.visibility = 'hidden'; }
+
+
+        function toggleAnalysisModal(show, title = '', iconName = '', colorName = '') {
+    const m = document.getElementById('analysisModal');
+    const c = document.getElementById('modalContainer');
+    
+    if (show) {
+        const data = kpiData[title] || kpiData['Inventory $'];
+        document.getElementById('modalKpiTitle').innerText = title;
+        
+        // --- NAYA LOGIC: Modal Center Value Setup ---
+        // Dashboard se current KPI ki value fetch karna (Sales, Inventory, etc.)
+        let totalValue = "";
+        if (title.includes('Sales')) totalValue = document.getElementById('salesKPI').innerText;
+        else if (title.includes('Inventory')) totalValue = document.getElementById('inventoryKPI').innerText;
+        else if (title.includes('Waste')) totalValue = document.getElementById('expenseKPI').innerText;
+        else if (title.includes('Food Cost')) totalValue = document.getElementById('foodCostKPI').innerText;
+        else if (title.includes('Ideal')) totalValue = document.getElementById('weeklyKPI').innerText;
+        else if (title.includes('Profit')) totalValue = document.getElementById('profitKPI').innerText;
+        else if (title.includes('Variance')) totalValue = document.getElementById('varianceKPI').innerText;
+
+        // Modal center ko reset karna default total pe
+        const modalValueEl = document.getElementById('modalDonutValue');
+        const modalLabelEl = document.getElementById('modalDonutLabel');
+        if(modalValueEl) {
+            modalValueEl.innerText = totalValue;
+            modalValueEl.classList.remove('text-blue-600'); // Reset color
+        }
+        if(modalLabelEl) modalLabelEl.innerText = "TOTAL";
+
+        // Icon aur Color Setup
+        const iconBox = document.getElementById('modalKpiIcon');
+        iconBox.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+        iconBox.className = `w-10 h-10 bg-${colorName}-500 text-white rounded-xl flex items-center justify-center shadow-lg`;
+
+        // Y-Axis Labels update
+        document.getElementById('yMax').innerText = data.yLabels[0];
+        document.getElementById('yMidHigh').innerText = data.yLabels[1];
+        document.getElementById('yMid').innerText = data.yLabels[2];
+        document.getElementById('yLow').innerText = data.yLabels[3];
+        document.getElementById('trendPath').setAttribute('stroke', data.color);
+
+        // Breakdown Legend setup
+        const legend = document.getElementById('modalLegend');
+        legend.innerHTML = `<div class="mb-6"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Breakdown By</p><h3 class="text-lg font-extrabold text-slate-800">Category </h3></div>`;
+
+        // Floating labels reset
+        const labelGroup = document.getElementById('donutLabels');
+        if(labelGroup) labelGroup.innerHTML = '';
+
+        let cumulativeOffset = 0;
+        data.categories.forEach((cat, idx) => {
+            // Legend Logic
+            legend.innerHTML += `
+                <div class="flex items-center space-x-4 mb-5 group cursor-pointer" onclick="updateModalDonutCenter('${cat.label}', '${cat.value}')">
+                    <span class="w-3.5 h-3.5 rounded-md shadow-sm" style="background-color: ${cat.color}"></span>
+                    <div class="flex flex-col">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">${cat.label}</div>
+                        <div class="text-[15px] font-black text-slate-800 leading-none group-hover:text-blue-600 transition-colors">
+                            ${cat.percent} <span class="text-[12px] text-slate-400 font-bold ml-1">(${cat.value})</span>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Segment Logic
+            const seg = document.getElementById(`donutSeg${idx+1}`);
+            if (seg) {
+                const dashArray = (parseFloat(cat.percent) * 238.7) / 100;
+                seg.setAttribute('stroke', cat.color);
+                seg.setAttribute('stroke-width', '18');
+                seg.style.strokeDasharray = `${dashArray} 238.7`;
+                seg.style.strokeDashoffset = `-${cumulativeOffset}`;
+                
+                // Click event on segment to show amount in center
+                seg.style.cursor = "pointer";
+                seg.onclick = () => updateModalDonutCenter(cat.label, cat.value);
+
+                // Outer Labels logic (remain unchanged as requested)
+                const midAngle = (cumulativeOffset + (dashArray / 2)) * (360 / 238.7);
+                const angleRad = (midAngle - 90) * (Math.PI / 180);
+                const labelRadius = 54; 
+                const x = 50 + labelRadius * Math.cos(angleRad);
+                const y = 50 + labelRadius * Math.sin(angleRad);
+
+                if(labelGroup) {
+                    labelGroup.innerHTML += `
+                        <g transform="translate(${x}, ${y})" class="transition-all duration-500">
+                            <text fill="${cat.color}" font-size="5" font-weight="900" text-anchor="middle" class="tracking-tighter">${cat.percent}</text>
+                            <text y="5" fill="#94a3b8" font-size="3.5" font-weight="700" text-anchor="middle">${cat.value}</text>
+                        </g>`;
+                }
+                cumulativeOffset += dashArray;
+            }
+        });
+
+        switchTab('trend'); 
+        lucide.createIcons();
+        m.classList.remove('pointer-events-none', 'opacity-0');
+        m.classList.add('opacity-100', 'pointer-events-auto');
+        c.classList.remove('scale-95');
+        c.classList.add('scale-100');
+    } else {
+        m.classList.add('opacity-0', 'pointer-events-none');
+        m.classList.remove('opacity-100', 'pointer-events-auto');
+        c.classList.add('scale-95');
+    }
+}
+
+// Helper function to update the center text
+function updateModalDonutCenter(label, value) {
+    const labelEl = document.getElementById('modalDonutLabel');
+    const valueEl = document.getElementById('modalDonutValue');
+    
+    valueEl.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        labelEl.innerText = label;
+        valueEl.innerText = value;
+        valueEl.style.transform = 'scale(1)';
+        valueEl.classList.add('text-blue-600');
+    }, 100);
+}
+
+        function switchTab(t) {
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    document.getElementById('tab-' + t).classList.add('active');
+    
+    const bt = document.getElementById('btn-trend');
+    const bb = document.getElementById('btn-breakdown');
+    
+    if (t === 'trend') {
+        bt.className = 'px-6 py-2 text-[10px] font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600';
+        bb.className = 'px-6 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600';
+    } else {
+        bt.className = 'px-6 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600';
+        bb.className = 'px-6 py-2 text-[10px] font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600';
+    }
+}
+
+        window.onload = () => {
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach(bar => { const w = bar.style.width; bar.style.width = '0'; setTimeout(() => bar.style.width = w, 100); });
+        };
+		
+		let selectedInventoryType = "daily";
+
+const inventoryDropdown = document.getElementById("inventoryType");
+const viewBtn = document.getElementById("viewBtn");
+
+if (inventoryDropdown && viewBtn) {
+
+  inventoryDropdown.addEventListener("change", (e) => {
+    selectedInventoryType = e.target.value;
+  });
+
+  viewBtn.addEventListener("click", () => {
+    refreshKPI(selectedInventoryType);
+  });
+
+}
+
+function refreshKPI(type) {
+
+  const data = getMockKPIData(type);
+
+  document.getElementById("salesKPI").innerText = data.sales;
+  document.getElementById("inventoryKPI").innerText = data.inventory;
+  document.getElementById("weeklyKPI").innerText = data.weekly;
+  document.getElementById("foodCostKPI").innerText = data.foodCost;
+  document.getElementById("profitKPI").innerText = data.profit;
+  document.getElementById("varianceKPI").innerText = data.variance;
+  document.getElementById("expenseKPI").innerText = data.expense;
+}
+
+function getMockKPIData(type) {
+
+  const datasets = {
+
+    daily: {
+      sales: "$12,540",
+      inventory: "$4,200",
+      weekly: "$1,850",
+      foodCost: "26%",
+      profit: "22%",
+      variance: "-2%",
+      expense: "$900"
+    },
+
+    weekly: {
+      sales: "$84,000",
+      inventory: "$18,500",
+      weekly: "30%",
+      foodCost: "27%",
+      profit: "24%",
+      variance: "-3%",
+      expense: "$8,432"
+    },
+
+    monthly: {
+      sales: "$342,000",
+      inventory: "$76,200",
+      weekly: "$29%",
+      foodCost: "28%",
+      profit: "25%",
+      variance: "-1%",
+      expense: "$31,500"
+    }
+
+  };
+
+  return datasets[type];
+}
+
+
+let isDaysView = false;
+const originalTotal = "$17.6K";
+
+function toggleInventoryView() {
+    const inv = document.getElementById('inventoryOnHandView');
+    const days = document.getElementById('daysOnHandView');
+    const title = document.getElementById('toggleHeaderTitle');
+    const toggleBg = document.getElementById('toggleBg');
+    const tInv = document.getElementById('text-inv');
+    const tDays = document.getElementById('text-days');
+    const iconBox = document.getElementById('toggleIconBox');
+    const icon = document.getElementById('viewIcon');
+
+    if (!isDaysActive) {
+        // SWITCH TO DAYS VIEW
+        inv.classList.replace('opacity-100', 'opacity-0');
+        inv.classList.replace('z-20', 'z-10');
+        
+        days.classList.replace('opacity-0', 'opacity-100');
+        days.classList.replace('z-10', 'z-20');
+        days.classList.remove('pointer-events-none');
+        days.style.transform = "translateY(0)";
+
+        // Trigger horizontal bar animation
+        const bars = days.querySelectorAll('.horizontal-bar');
+        bars.forEach(bar => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => bar.style.width = finalWidth, 50);
+        });
+
+        title.innerText = "Top 5 Lowest Days On Hand";
+        toggleBg.style.left = "calc(50%)";
+        tInv.classList.add('text-slate-400');
+        tDays.classList.remove('text-slate-400');
+        iconBox.className = "p-1.5 bg-blue-100 text-blue-600 rounded-lg shadow-inner";
+        icon.setAttribute('data-lucide', 'bar-chart-horizontal');
+        isDaysActive = true;
+    } else {
+        // SWITCH TO INVENTORY VIEW
+        inv.classList.replace('opacity-0', 'opacity-100');
+        inv.classList.replace('z-10', 'z-20');
+
+        days.classList.replace('opacity-100', 'opacity-0');
+        days.classList.replace('z-20', 'z-10');
+        days.classList.add('pointer-events-none');
+        days.style.transform = "translateY(16px)";
+
+        title.innerText = "Inventory On Hand";
+        toggleBg.style.left = "2px";
+        tInv.classList.remove('text-slate-400');
+        tDays.classList.add('text-slate-400');
+        iconBox.className = "p-1.5 bg-emerald-100 text-emerald-600 rounded-lg shadow-inner";
+        icon.setAttribute('data-lucide', 'pie-chart');
+        isDaysActive = false;
+    }
+    lucide.createIcons();
+}
+
+let isDaysActive = false;
+
+function toggleInventoryView() {
+    const inv = document.getElementById('inventoryOnHandView');
+    const days = document.getElementById('daysOnHandView');
+    const title = document.getElementById('toggleHeaderTitle');
+    const toggleBg = document.getElementById('toggleBg');
+    const tInv = document.getElementById('text-inv');
+    const tDays = document.getElementById('text-days');
+    const iconBox = document.getElementById('toggleIconBox');
+    const icon = document.getElementById('viewIcon');
+
+    if (!isDaysActive) {
+        // TO DAYS VIEW
+        inv.classList.replace('opacity-100', 'opacity-0');
+        inv.classList.replace('z-20', 'z-10');
+        
+        days.classList.replace('opacity-0', 'opacity-100');
+        days.classList.replace('z-10', 'z-20');
+        days.classList.remove('pointer-events-none');
+        days.style.transform = "translateY(0)";
+
+        title.innerText = "Top 10 Items with Lowest Days On Hand";
+        toggleBg.style.left = "calc(50%)";
+        tInv.classList.add('text-slate-400');
+        tDays.classList.remove('text-slate-400');
+        iconBox.className = "p-1.5 bg-blue-100 text-blue-600 rounded-lg shadow-inner";
+        icon.setAttribute('data-lucide', 'bar-chart-3');
+        isDaysActive = true;
+    } else {
+        // TO INVENTORY VIEW
+        inv.classList.replace('opacity-0', 'opacity-100');
+        inv.classList.replace('z-10', 'z-20');
+
+        days.classList.replace('opacity-100', 'opacity-0');
+        days.classList.replace('z-20', 'z-10');
+        days.classList.add('pointer-events-none');
+        days.style.transform = "translateY(16px)";
+
+        title.innerText = "Inventory On Hand";
+        toggleBg.style.left = "2px";
+        tInv.classList.remove('text-slate-400');
+        tDays.classList.add('text-slate-400');
+        iconBox.className = "p-1.5 bg-emerald-100 text-emerald-600 rounded-lg shadow-inner";
+        icon.setAttribute('data-lucide', 'pie-chart');
+        isDaysActive = false;
+    }
+    lucide.createIcons();
+}
+
+function showChartTip(e, text) {
+    const tip = document.getElementById('chartTooltipBox');
+    const textEl = document.getElementById('tooltipText');
+    textEl.innerText = text;
+    tip.classList.remove('hidden');
+    tip.style.left = e.clientX + "px";
+    tip.style.top = (e.clientY - 15) + "px";
+}
+
+function hideChartTip() {
+    document.getElementById('chartTooltipBox').classList.add('hidden');
+}
+
+function showBarTip(el, text) {
+    const tip = document.getElementById('chartTooltipBox');
+    const textEl = document.getElementById('tooltipText');
+    const bar = el.querySelector('div');
+    const rect = bar.getBoundingClientRect();
+    
+    textEl.innerText = text;
+    tip.classList.remove('hidden');
+    tip.style.left = (rect.left + rect.width / 2) + "px";
+    tip.style.top = (rect.top - 10) + "px";
+}
+
+function hideBarTip() {
+    document.getElementById('chartTooltipBox').classList.add('hidden');
+}
+
+function updateDonutCenter(label, value) {
+        const labelEl = document.getElementById('centerLabel');
+        const valueEl = document.getElementById('centerValue');
+        
+        // Add a small scale effect for feedback
+        valueEl.style.transform = 'scale(0.9)';
+        
+        setTimeout(() => {
+            labelEl.innerText = label;
+            valueEl.innerText = value;
+            valueEl.style.transform = 'scale(1)';
+            
+            // Highlight color if it's not the total
+            if(label !== 'Total') {
+                valueEl.classList.replace('text-slate-800', 'text-blue-600');
+            } else {
+                valueEl.classList.replace('text-blue-600', 'text-slate-800');
+            }
+        }, 100);
+    }
+	
+	// Toggle Function for Sections
+    function toggleAlertSection(sectionId, headerEl) {
+        const section = document.getElementById(sectionId);
+        const icon = headerEl.querySelector('.lucide-chevron-down');
+        
+        // Using scrollHeight is safer than a hardcoded pixel value
+        if (section.style.maxHeight === "0px" || section.classList.contains('hidden-state')) {
+            section.style.maxHeight = section.scrollHeight + "px";
+            section.style.padding = "1rem";
+            icon.style.transform = "rotate(180deg)";
+            section.classList.remove('hidden-state');
+        } else {
+            section.style.maxHeight = "0px";
+            section.style.padding = "0";
+            icon.style.transform = "rotate(0deg)";
+            section.classList.add('hidden-state');
+        }
+    }
+	function resetModalDonut() {
+    document.getElementById('modalDonutLabel').innerText = "TOTAL";
+    document.getElementById('modalDonutValue').innerText = modalOriginalValue;
+    document.getElementById('modalDonutValue').classList.remove('text-blue-600');
+}
+	
+    </script>
+</body>
+</html>
