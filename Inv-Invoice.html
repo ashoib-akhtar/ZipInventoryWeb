@@ -51,7 +51,7 @@
         /* Table Styling */
         .invoice-table th {
             font-size: 11px;
-            text-transform: uppercase;
+            text-transform: ;
             letter-spacing: 0.025em;
             color: #64748b;
             font-weight: 700;
@@ -100,13 +100,9 @@
             transform: translate(-50%, -50%); color: white; font-size: 9px; font-weight: bold;
         }
 
-        .view-container { display: none; 
-    flex-direction: column; 
-    height: calc(100vh - 56px); /* Top header ki height minus ki hai */
-    width: 100%; }
-        .view-active { display: flex ! source; }
+.view-container { display: none !important; width: 100%; height: calc(100vh - 56px); flex-direction: column; }
+.view-active { display: flex !important; }
 		
-.view-active { display: flex; }
 
 /* Table container ko flexible banane ke liye */
 #itemsTableView, #categoryTableView {
@@ -118,6 +114,19 @@
 
 .toggle-btn-active { @apply px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700 transition-all; }
 .toggle-btn-inactive { @apply px-5 py-1 text-[10px] font-bold rounded-full text-slate-400 transition-all; }
+
+.view-active {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%; /* Pura space lene ke liye */
+}
+
+/* Taaki table wala area scroll ho, cards nahi */
+#invoiceListBody {
+    overflow-y: auto;
+}
+.row-flagged { background-color: #fff1f2 !important; border-left: 4px solid #f43f5e !important; }
+.flag-active { color: #f43f5e !important; fill: #f43f5e; }
     </style>
 </head>
 <body class="flex">
@@ -128,7 +137,7 @@
             <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center flex-shrink-0">
                 <i data-lucide="layout-grid" class="text-white w-4 h-4"></i>
             </div>
-            <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider uppercase"></span>
+            <span class="menu-text font-bold text-white text-xs ml-3 tracking-wider "></span>
         </div>
 
         <nav class="flex flex-col flex-1 overflow-y-auto custom-scrollbar mt-2">
@@ -207,7 +216,7 @@
         <!-- Top Nav (Primary) -->
         <header class="h-14 bg-[#0f172a] text-white flex items-center justify-between px-6 border-b border-slate-700 flex-shrink-0">
             <div class="flex items-center space-x-6 text-[12px]">
-                <div class="flex items-center space-x-2"><span class="font-semibold uppercase text-slate-200">My Apps</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i></div>
+                <div class="flex items-center space-x-2"><span class="font-semibold  text-slate-200">My Apps</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i></div>
                 <div class="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-3 py-1 rounded cursor-pointer">
                     <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i><span class="font-medium">Costa Mesa</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
                 </div>
@@ -217,7 +226,7 @@
                     <div class="flex items-center space-x-2 text-xs font-semibold">
                         <i data-lucide="cloud-sun" class="w-4 h-4 text-yellow-400"></i><span>09:20<sup class="text-[8px] opacity-70">A</sup></span>
                     </div>
-                    <span class="text-slate-500 text-[9px] font-bold uppercase tracking-widest">America/Los Angeles</span>
+                    <span class="text-slate-500 text-[9px] font-bold  tracking-widest">America/Los Angeles</span>
                 </div>
                 <div class="flex items-center space-x-3 bg-slate-800 px-3 py-1 rounded border border-slate-700 cursor-pointer">
                     <i data-lucide="building-2" class="w-3 h-3 text-blue-400"></i><span class="font-bold text-[10px]">CORPORATE</span><i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
@@ -227,99 +236,149 @@
         </header>
 
         <!-- VIEW 1: INVOICES LIST -->
-        <div id="listView" class="view-container view-active">
-            <div class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm">
-                <div class="flex-1 flex items-center space-x-4">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-slate-400"></i>
-                    <h1 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Invoices</h1>
-                    <div class="flex items-center space-x-2 ml-4 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-white transition-colors">
-                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
-                        <span class="text-[11px] font-bold text-slate-600">01/10/2026 - 02/09/2026</span>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex justify-center">
-                    <div class="relative flex items-center">
-                        <div id="filterToggle" class="flex items-center justify-center space-x-2 bg-white border border-slate-200 rounded-full px-6 py-1.5 cursor-pointer hover:shadow-sm transition-all">
-                            <span class="text-[11px] font-bold text-slate-500">Filters</span>
-                            <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
-                        </div>
-                        <div id="filterDropdown" class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[320px] bg-white border border-slate-200 rounded-xl shadow-2xl z-[60] p-4 hidden-dropdown">
-                            <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-slate-200 rotate-45"></div>
-                            <button id="closeFilter" class="absolute top-1.5 right-1.5 text-slate-300 hover:text-slate-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-3">
-                                    <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Suppliers</h3>
-                                    <div class="space-y-2 pt-1">
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="GFS" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">GFS</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="PEPSI" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">PEPSI</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="URS" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">URS</span></label>
-                                    </div>
-                                </div>
-                                <div class="space-y-3 relative">
-                                    <div class="absolute -left-2 top-0 bottom-0 w-px bg-slate-100"></div>
-                                    <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Status</h3>
-                                    <div class="space-y-2 pt-1">
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Pending" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Pending</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Received" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Received</span></label>
-                                        <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Finalized</span></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-6 pt-3 border-t border-slate-100 flex justify-between items-center">
-                                <button id="clearFilters" class="px-5 py-1.5 bg-rose-400 hover:bg-rose-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Clear</button>
-                                <button id="applyFilters" class="px-6 py-1.5 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Apply</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex items-center justify-end space-x-3">
-                    <div class="p-2 text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="wrench" class="w-4 h-4"></i></div>
-                    <button class="bg-[#4dd0e1] hover:bg-[#26c6da] text-white px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider shadow-sm transition-colors">Add Invoice</button>
-                </div>
-            </div>
-            
-            <div class="flex-1 overflow-auto bg-white custom-scrollbar">
-                <table class="w-full invoice-table border-collapse">
-                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                        <tr>
-                            <th>Status <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th>Invoice No. <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th>Supplier Name <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th>Received On <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th>Finalized On <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th>Delivery Date <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th class="text-right">Credit Amount <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th class="text-right">Total Amount <i data-lucide="arrow-up-down" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                            <th class="text-center">Action(s) <i data-lucide="search" class="w-2.5 h-2.5 inline-block ml-1 opacity-50"></i></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100" id="invoiceListBody">
-                        <!-- Rows populated by Script -->
-                    </tbody>
-                </table>
+        <div id="listView" class="view-container view-active flex flex-col h-full bg-slate-50">
+    <div class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm flex-shrink-0">
+        <div class="flex-1 flex items-center space-x-4">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-slate-400"></i>
+            <h1 class="text-sm font-bold text-slate-600  tracking-wide">Invoices</h1>
+            <div class="flex items-center space-x-2 ml-4 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-white transition-colors">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span class="text-[11px] font-bold text-slate-600">01/10/2026 - 02/09/2026</span>
             </div>
         </div>
+
+        <div class="flex-1 flex justify-center">
+            <div class="relative flex items-center">
+                <div id="filterToggle" class="flex items-center justify-center space-x-2 bg-white border border-slate-200 rounded-full px-6 py-1.5 cursor-pointer hover:shadow-sm transition-all">
+                    <span class="text-[11px] font-bold text-slate-500">Filters</span>
+                    <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
+                </div>
+                <div id="filterDropdown" class="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[320px] bg-white border border-slate-200 rounded-xl shadow-2xl z-[60] p-4 hidden-dropdown">
+                    <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-slate-200 rotate-45"></div>
+                    <button id="closeFilter" class="absolute top-1.5 right-1.5 text-slate-300 hover:text-slate-500 p-1"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Suppliers</h3>
+                            <div class="space-y-2 pt-1">
+                                <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="GFS" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">GFS</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox supplier-filter" value="PEPSI" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">PEPSI</span></label>
+                            </div>
+                        </div>
+                        <div class="space-y-3 relative">
+                            <div class="absolute -left-2 top-0 bottom-0 w-px bg-slate-100"></div>
+                            <h3 class="text-[13px] font-bold text-slate-700 border-b-2 border-blue-600 inline-block pb-0.5 mb-1">Status</h3>
+                            <div class="space-y-2 pt-1">
+                                <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Finalized</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <button id="clearFilters" class="px-5 py-1.5 bg-rose-400 hover:bg-rose-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Clear</button>
+                        <button id="applyFilters" class="px-6 py-1.5 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-full text-[11px] transition-all shadow-sm">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex items-center justify-end space-x-3">
+            <div class="p-2 text-slate-400 hover:text-slate-600 cursor-pointer"><i data-lucide="wrench" class="w-4 h-4"></i></div>
+            <button class="bg-[#4dd0e1] hover:bg-[#26c6da] text-white px-4 py-2 rounded-lg text-[11px] font-bold  tracking-wider shadow-sm transition-colors">Add Invoice</button>
+        </div>
+    </div>
+
+    <div class="px-6 py-4 grid grid-cols-4 gap-4 bg-slate-50/50 flex-shrink-0">
+        <div id="kpi-all" onclick="handleKPIClick('all', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-blue-500 cursor-pointer transition-all flex items-center space-x-4">
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i>
+            </div>
+            <div>
+                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Total Spend</p>
+                <div class="flex items-baseline space-x-2">
+                    <p class="text-lg font-black text-slate-800 leading-none">$38,175.65</p>
+                    <span class="text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded leading-none">+12%</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="kpi-finalized" onclick="handleKPIClick('Finalized', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-emerald-200 cursor-pointer transition-all flex items-center space-x-4">
+            <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <div>
+                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Finalized</p>
+                <div class="flex items-baseline space-x-2">
+                    <p class="text-lg font-black text-slate-800 leading-none">142</p>
+                    <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-none">92%</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="kpi-warning" onclick="handleKPIClick('Warning', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-rose-200 cursor-pointer transition-all flex items-center space-x-4">
+            <div class="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
+            </div>
+            <div>
+                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Warnings</p>
+                <div class="flex items-baseline space-x-2">
+                    <p class="text-lg font-black text-slate-800 leading-none">32</p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div id="kpi-credit" onclick="handleKPIClick('Credit', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-200 cursor-pointer transition-all flex items-center space-x-4">
+            <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="file-text" class="w-5 h-5 text-amber-500"></i>
+            </div>
+            <div>
+                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Credit $</p>
+                <div class="flex items-baseline space-x-2">
+                    <p class="text-lg font-black text-slate-800 leading-none">$351.50</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex-1 overflow-auto bg-white custom-scrollbar border-t border-slate-100">
+        <table class="w-full invoice-table border-collapse">
+            <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                <tr class="text-left">
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Invoice No.</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Supplier Name</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Received On</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Finalized On</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Delivery Date</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Credit Amount</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Total Amount</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-center">Action(s)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100" id="invoiceListBody">
+                </tbody>
+        </table>
+    </div>
+</div>
 
         <!-- VIEW 2: INVOICE EDIT -->
        <div id="editView" class="view-container flex flex-col">
     <div class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm flex-shrink-0">
         <div class="flex-1 flex items-center space-x-4">
             <div class="bg-[#8b5cf6] p-1.5 rounded-lg text-white"><i data-lucide="file-text" class="w-4 h-4"></i></div>
-            <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Invoice</h2>
+            <h2 class="text-sm font-bold text-slate-600  tracking-wide">Invoice</h2>
         </div>
         <div class="flex-1 flex justify-center">
             <div class="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200">
-                <button id="toggleItems" class="px-5 py-1 text-[10px] font-bold rounded-full bg-white shadow-sm text-slate-700 transition-all">View By Items</button>
-                <button id="toggleCategory" class="px-5 py-1 text-[10px] font-bold rounded-full text-slate-400 transition-all">View By Category</button>
+                <button id="toggleItems" class="px-5 py-1 text-[12px] font-bold rounded-full bg-white shadow-sm text-slate-700 transition-all">View By Items</button>
+                <button id="toggleCategory" class="px-5 py-1 text-[12px] font-bold rounded-full text-slate-400 transition-all">View By Category</button>
             </div>
         </div>
         <div class="flex-1 flex items-center justify-end space-x-2">
-            <button class="bg-[#22d3ee] text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5"></i> <span>Un-Finalize</span></button>
-            <button onclick="closeInvoiceEdit()" class="bg-rose-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase flex items-center space-x-2"><i data-lucide="x" class="w-3.5 h-3.5"></i> <span>Close</span></button>
+            <button class="bg-[#22d3ee] text-white px-4 py-2 rounded-lg text-[10px] font-bold  flex items-center space-x-2"><i data-lucide="check" class="w-3.5 h-3.5"></i> <span>Un-Finalize</span></button>
+            <button onclick="closeInvoiceEdit()" class="bg-rose-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold  flex items-center space-x-2"><i data-lucide="x" class="w-3.5 h-3.5"></i> <span>Close</span></button>
         </div>
     </div>
 
@@ -327,37 +386,37 @@
         <div class="grid grid-cols-4 gap-4 max-w-[1600px]">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Supplier Name</p>
+                    <p class="text-[12px] font-bold text-slate-600  tracking-tight">Supplier Name</p>
                     <p class="text-lg font-bold text-blue-600 mt-1" id="editSupplier">GFS</p>
                 </div>
                 <div class="flex justify-between items-end">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">P.O. Number</p>
+                    <p class="text-[12px] font-bold text-slate-600  tracking-tight">P.O. Number</p>
                     <span class="bg-slate-50 px-2 py-1 rounded text-[10px] font-bold text-slate-700 border border-slate-200">0000228851</span>
                 </div>
             </div>
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
                 
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Delivery Date</p>
+                    <p class="text-[12px] font-bold text-slate-600  tracking-tight">Delivery Date</p>
                     <p class="text-lg font-bold text-blue-600 mt-1">01/10/2026</p>
               
                 <div class="flex justify-between items-end">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Received On</p>
+                    <p class="text-[12px] font-bold text-slate-600  tracking-tight">Received On</p>
                     <span class="bg-slate-50 px-2 py-1 rounded text-[10px] font-bold text-slate-700 border border-slate-200">01/10/2026</span>
                 </div>
             </div>
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-28">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Invoice No.</p>
+                    <p class="text-[12px] font-bold text-slate-600  tracking-tight">Invoice No.</p>
                      <p class="text-lg font-bold text-blue-600 mt-1" id="editInvNo">#269829</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <div class="w-2 h-2 rounded-full bg-emerald-600"></div>
                     <p class="text-[11px] font-bold text-emerald-500">Finalized</p>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-4 rounded-2xl shadow-md flex flex-col justify-between h-28 text-white relative overflow-hidden">
     <div class="flex justify-between items-start relative z-10">
-        <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wider">Total Items</p>
+        <p class="text-[12px] font-bold text-indigo-50  tracking-wider">Total Items</p>
         
         <label class="cursor-pointer hover:bg-white/20 p-1.5 rounded-full transition-all border border-white/10 bg-white/5" title="Attach Files">
             <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
@@ -431,19 +490,19 @@
             { id: '269829', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 134.00' },
             { id: '9031045310', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 6,856.25', alert: 7 },
             { id: '269851', status: 'Finalized', supplier: 'GFS', received: '01/10/2026', finalized: '01/10/2026', delivery: '01/10/2026', credit: '$ 0.00', total: '$ 72.00' },
-            { id: '47113910', status: 'Finalized', supplier: 'PEPSI', received: '01/13/2026', finalized: '01/13/2026', delivery: '01/12/2026', credit: '$ 0.00', total: '$ 798.44' },
+            { id: '47113910', status: 'Unfinalized', supplier: 'PEPSI', received: '01/13/2026', finalized: '', delivery: '01/12/2026', credit: '$ 0.00', total: '$ 798.44' },
             { id: '9031160601', status: 'Finalized', supplier: 'GFS', received: '01/14/2026', finalized: '01/14/2026', delivery: '01/14/2026', credit: '$ 0.00', total: '$ 7,001.70', alert: 7 },
             { id: '270120', status: 'Finalized', supplier: 'GFS', received: '01/14/2026', finalized: '01/14/2026', delivery: '01/14/2026', credit: '$ 0.00', total: '$ 108.00' },
             { id: '9031296534', status: 'Finalized', supplier: 'GFS', received: '01/17/2026', finalized: '01/18/2026', delivery: '01/17/2026', credit: '$ 0.00', total: '$ 7,576.30', alert: 8 },
             { id: '270476', status: 'Finalized', supplier: 'GFS', received: '01/19/2026', finalized: '01/19/2026', delivery: '01/19/2026', credit: '$ 0.00', total: '$ 38.50' },
             { id: '4919906', status: 'Finalized', supplier: 'PEPSI', received: '01/19/2026', finalized: '01/19/2026', delivery: '01/19/2026', credit: '$ 0.00', total: '$ 823.39' },
             { id: '270581', status: 'Finalized', supplier: 'GFS', received: '01/20/2026', finalized: '01/23/2026', delivery: '01/20/2026', credit: '$ 0.00', total: '$ 72.00' },
-            { id: '9031404612', status: 'Finalized', supplier: 'GFS', received: '01/21/2026', finalized: '01/22/2026', delivery: '01/21/2026', credit: '$ 351.50', total: '$ 7,685.68', alert: 6 },
+            { id: '9031404612', status: 'Unfinalized', supplier: 'GFS', received: '01/21/2026', finalized: '', delivery: '01/21/2026', credit: '$ 351.50', total: '$ 7,685.68', alert: 6 },
             { id: '270640', status: 'Finalized', supplier: 'GFS', received: '01/21/2026', finalized: '01/23/2026', delivery: '01/21/2026', credit: '$ 0.00', total: '$ 72.00' },
             { id: '270741', status: 'Finalized', supplier: 'GFS', received: '01/22/2026', finalized: '01/22/2026', delivery: '01/22/2026', credit: '$ 0.00', total: '$ 36.00' },
             { id: '270843', status: 'Finalized', supplier: 'GFS', received: '01/23/2026', finalized: '01/23/2026', delivery: '01/23/2026', credit: '$ 0.00', total: '$ 126.00' },
             { id: '9031540464', status: 'Finalized', supplier: 'GFS', received: '01/24/2026', finalized: '01/25/2026', delivery: '01/24/2026', credit: '$ 0.00', total: '$ 8,137.20', alert: 6 },
-            { id: '49472411', status: 'Finalized', supplier: 'PEPSI', received: '01/26/2026', finalized: '01/26/2026', delivery: '01/26/2026', credit: '$ 0.00', total: '$ 884.17' },
+            { id: '49472411', status: 'Unfinalized', supplier: 'PEPSI', received: '01/26/2026', finalized: '', delivery: '01/26/2026', credit: '$ 0.00', total: '$ 884.17' },
             { id: '271089', status: 'Finalized', supplier: 'GFS', received: '01/27/2026', finalized: '01/31/2026', delivery: '01/27/2026', credit: '$ 0.00', total: '$ 106.00' },
             { id: '9031633013', status: 'Finalized', supplier: 'GFS', received: '01/28/2026', finalized: '01/29/2026', delivery: '01/28/2026', credit: '$ 0.00', total: '$ 4,944.79', alert: 4 },
             { id: '271323', status: 'Finalized', supplier: 'GFS', received: '01/30/2026', finalized: '01/30/2026', delivery: '01/30/2026', credit: '$ 0.00', total: '$ 184.00' },
@@ -487,25 +546,42 @@
 
         // --- Functions ---
         function populateInvoiceList() {
-            const body = document.getElementById('invoiceListBody');
-            body.innerHTML = invoiceListData.map(inv => `
-                <tr class="data-row cursor-pointer" onclick="openInvoiceEdit('${inv.id}', '${inv.supplier}')">
-                    <td class="flex items-center space-x-2">
-                        <span class="status-finalized">${inv.status}</span>
-                        ${inv.alert ? `<div class="warning-badge"><i data-lucide="alert-triangle" class="w-3 h-3"></i> ${inv.alert}</div>` : ''}
-                    </td>
-                    <td>${inv.id}</td>
-                    <td class="font-bold">${inv.supplier}</td>
-                    <td>${inv.received}</td>
-                    <td>${inv.finalized}</td>
-                    <td>${inv.delivery}</td>
-                    <td class="text-right text-slate-400">${inv.credit}</td>
-                    <td class="text-right font-bold">${inv.total}</td>
-                    <td class="text-center"><i data-lucide="edit-3" class="w-4 h-4 text-blue-400 mx-auto"></i></td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
+    const body = document.getElementById('invoiceListBody');
+    body.innerHTML = invoiceListData.map(inv => {
+        const isUnfinalized = inv.status === 'Unfinalized';
+        // Warning Badge Logic (Wapas add kiya gaya)
+        const warningBadge = inv.alert ? 
+            `<div class="warning-badge flex items-center ml-2 bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-200">
+                <i data-lucide="alert-triangle" class="w-3 h-3 mr-1"></i>${inv.alert}
+             </div>` : '';
+
+        return `
+            <tr class="data-row cursor-pointer transition-all border-b border-slate-100 hover:bg-slate-50" onclick="openInvoiceEdit('${inv.id}', '${inv.supplier}')">
+                <td class="py-3 px-4 flex items-center">
+                    <span class="${isUnfinalized ? 'text-amber-600 font-bold' : 'status-finalized'}">${inv.status}</span>
+                    ${warningBadge}
+                </td>
+                <td class="py-3 px-4 text-slate-500">${inv.id}</td>
+                <td class="py-3 px-4 font-bold text-slate-700">${inv.supplier}</td>
+                <td class="py-3 px-4 text-slate-500">${inv.received}</td>
+                <td class="py-3 px-4 text-slate-500">${inv.finalized}</td>
+                <td class="py-3 px-4 text-slate-500">${inv.delivery}</td>
+                <td class="py-3 px-4 text-right text-slate-400">${inv.credit}</td>
+                <td class="py-3 px-4 text-right font-bold text-slate-700">${inv.total}</td>
+                <td class="py-3 px-4 text-center">
+                    <div class="flex items-center justify-center space-x-3">
+                        ${isUnfinalized ? `
+                            <button onclick="toggleFlag(event)" class="flag-btn p-1 hover:bg-rose-50 rounded transition-colors text-slate-300">
+                                <i data-lucide="flag" class="w-4 h-4"></i>
+                            </button>` : '<div class="w-6"></div>'} 
+                        <i data-lucide="edit-3" class="w-4 h-4 text-blue-400"></i>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    lucide.createIcons();
+}
 
         function populateEditItems() {
             const body = document.getElementById('editItemBody');
@@ -515,8 +591,8 @@
                         <span class="${item.blue ? 'text-slate-800' : 'text-slate-400'}">${item.sku}</span>
                         ${item.alert ? `<i data-lucide="alert-triangle" class="w-3 h-3 text-rose-500"></i>` : ''}
                     </td>
-                    <td class="font-bold uppercase ${item.blue ? 'text-blue-500' : ''}">${item.name}</td>
-                    <td class="text-slate-400 uppercase">${item.cat}</td>
+                    <td class="font-bold  ${item.blue ? 'text-blue-500' : ''}">${item.name}</td>
+                    <td class="text-slate-400 ">${item.cat}</td>
                     <td class="text-right">$${item.price}</td>
                     <td>${item.desc}</td>
                     <td class="text-center">${item.order}</td>
@@ -535,8 +611,8 @@
             body.innerHTML = categoryEditData.map(cat => `
                 <tr class="bg-white data-row">
                     <td class="font-medium flex items-center space-x-2">${cat.gl} ${cat.gl !== '-' ? '' : ''}</td>
-                    <td class="font-bold uppercase">${cat.name}</td>
-                    <td class="text-slate-400 font-bold uppercase">${cat.major}</td>
+                    <td class="font-bold ">${cat.name}</td>
+                    <td class="text-slate-400 font-bold ">${cat.major}</td>
                     <td class="text-center font-bold">${cat.total}</td>
                     <td class="text-right font-bold">${cat.price}</td>
                     <td class="text-right font-bold">${cat.tax}</td>
@@ -592,6 +668,79 @@
         window.onload = () => {
             populateInvoiceList();
         };
+		
+		function filterByKPI(type) {
+    const rows = document.querySelectorAll('#invoiceListBody tr');
+    const cards = document.querySelectorAll('.kpi-card');
+
+    // 1. Visual feedback: Sabhi cards se active border hatao aur clicked wale pe lagao
+    cards.forEach(card => card.classList.remove('border-blue-400', 'border-emerald-400', 'border-rose-400', 'border-amber-400', 'shadow-md'));
+    
+    const activeCard = document.getElementById(`kpi-${type.toLowerCase()}`);
+    if(activeCard) {
+        activeCard.classList.add('shadow-md');
+        // Type ke hisaab se border color
+        if(type === 'Finalized') activeCard.classList.add('border-emerald-400');
+        else if(type === 'Warning') activeCard.classList.add('border-rose-400');
+        else if(type === 'Credit') activeCard.classList.add('border-amber-400');
+        else activeCard.classList.add('border-blue-400');
+    }
+
+    // 2. Filtering Logic
+    rows.forEach(row => {
+        const statusText = row.querySelector('td:first-child').innerText; // Status column
+        const creditVal = row.querySelector('td:nth-child(7)').innerText; // Credit column
+
+        if (type === 'all') {
+            row.style.display = '';
+        } else if (type === 'Finalized') {
+            row.style.display = statusText.includes('Finalized') ? '' : 'none';
+        } else if (type === 'Warning') {
+            // Check if row has a warning icon (alert-triangle)
+            row.style.display = row.innerHTML.includes('lucide-alert-triangle') || row.innerHTML.includes('warning') ? '' : 'none';
+        } else if (type === 'Credit') {
+            // Check if credit amount is more than 0
+            const amount = parseFloat(creditVal.replace('$', '').replace(',', '')) || 0;
+            row.style.display = amount > 0 ? '' : 'none';
+        }
+    });
+}
+
+function handleKPIClick(type, element) {
+    // UI Highlight reset
+    document.querySelectorAll('.kpi-card').forEach(c => c.classList.replace('border-blue-500', 'border-transparent'));
+    element.classList.replace('border-transparent', 'border-blue-500');
+
+    const rows = document.querySelectorAll('#invoiceListBody tr');
+    rows.forEach(row => {
+        const statusText = row.cells[0].innerText;
+        // Credit Column (Index 6) se symbol hata kar number nikalo
+        const creditVal = parseFloat(row.cells[6].innerText.replace(/[^0-9.-]+/g,"")) || 0;
+        const hasWarning = row.querySelector('.warning-badge') !== null;
+
+        if (type === 'all') row.style.display = '';
+        else if (type === 'Finalized') row.style.display = statusText.includes('Finalized') ? '' : 'none';
+        else if (type === 'Warning') row.style.display = hasWarning ? '' : 'none';
+        else if (type === 'Credit') row.style.display = creditVal > 0 ? '' : 'none';
+    });
+}
+
+function toggleFlag(event) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const row = btn.closest('tr');
+    const tbody = document.getElementById('invoiceListBody');
+
+    // Toggle Flag UI & Highlight
+    btn.classList.toggle('flag-active');
+    row.classList.toggle('row-flagged');
+
+    // Sorting: Flagged rows ko upar bhej do
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => b.classList.contains('row-flagged') - a.classList.contains('row-flagged'));
+    
+    rows.forEach(r => tbody.appendChild(r));
+}
     </script>
 </body>
 </html>
