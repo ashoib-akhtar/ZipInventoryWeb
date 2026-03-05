@@ -759,7 +759,7 @@
     <div class="table-scroll-wrapper overflow-x-auto">
         <table class="responsive-table w-full text-left border-collapse">
             <thead>
-                <tr class="text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 bg-slate-50 sticky top-0 z-40">
+                <tr class="text-[12px]  font-bold text-slate-700 border-b border-slate-200 bg-slate-50 sticky top-0 z-40">
                     <th class="sticky left-0 z-50 bg-slate-50 px-4 py-4 border-r border-slate-200">Ingr. ID</th>
                     <th class="sticky left-[80px] z-50 bg-slate-50 px-4 py-4 border-r border-slate-200">Item Name</th>
                     <th class="px-4 py-4 text-center">Unit</th>
@@ -778,7 +778,7 @@
             </thead>
             <tbody class="text-[10px] text-slate-600 font-medium">
                 
-                <tr class="category-header-row bg-slate-100 font-bold uppercase border-y border-slate-200 cursor-pointer" onclick="toggleCategory('bev-group', this)">
+                <tr class="category-header-row bg-slate-100 font-bold  border-y border-slate-200 cursor-pointer" onclick="toggleCategory('bev-group', this)">
                     <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">
                         BEVERAGE COST <i class="fas fa-chevron-down collapse-icon ml-2"></i>
                     </td>
@@ -796,14 +796,23 @@
                 </tr>
                 <tr class="bev-group hover:bg-blue-50/50 border-b border-slate-100 cursor-pointer" ">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>210951</span>
-                        </div>
-                    </td>
-                    <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">2L Bottle Coke</td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">210951</span>
+        </div>
+    </div>
+</td>
+
+<td onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+    class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800 cursor-pointer hover:text-blue-600 transition-colors">
+    2L Bottle Coke
+</td>
                     <td onclick="openItemDetailModal('2L Bottle Coke', 'ea')" class="px-4 py-2 text-center">ea</td>
 <td onclick="openItemDetailModal('2L Bottle Coke', 'ea')" class="px-4 py-2 text-right font-mono">$1.84</td>
 <td onclick="openItemDetailModal('2L Bottle Coke', 'ea')" class="px-4 py-2 text-right">346.0 | $636.6</td>
@@ -827,42 +836,60 @@
                 </tr>
                 <tr class="bev-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Diet Coke Syrup', 'BEVERAGE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>210955</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">21095</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Diet Coke Syrup</td>
                     <td class="px-4 py-2 text-center">BIB</td><td class="px-4 py-2 text-right font-mono">$85.00</td><td class="px-4 py-2 text-right">4.0 | $340.0</td><td class="px-4 py-2 text-right">2.0 | $170.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">5.2 | $442.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">0.80</span><span class="val-sub">0.94% | $68.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.75</span><span class="val-sub">0.88% | $63.7</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.05</span><span class="val-sub text-rose-500">-0.06% | $-4.2</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">12.1</span></td>
                 </tr>
                 <tr class="bev-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Orange Juice', 'BEVERAGE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>210960</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">210960</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Orange Juice</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$22.40</td><td class="px-4 py-2 text-right">10.0 | $224.0</td><td class="px-4 py-2 text-right">5.0 | $112.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">11.5 | $257.6</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">3.50</span><span class="val-sub">0.11% | $78.4</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">3.20</span><span class="val-sub">0.10% | $71.6</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.30</span><span class="val-sub text-rose-500">-0.01% | $-6.8</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">15.4</span></td>
                 </tr>
                 <tr class="bev-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Apple Juice', 'BEVERAGE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>210965</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">210965</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Apple Juice</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$19.50</td><td class="px-4 py-2 text-right">8.0 | $156.0</td><td class="px-4 py-2 text-right">4.0 | $78.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">9.0 | $175.5</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">3.00</span><span class="val-sub">0.09% | $58.5</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">2.80</span><span class="val-sub">0.08% | $54.6</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.20</span><span class="val-sub text-rose-500">-0.01% | $-3.9</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">21.2</span></td>
                 </tr>
 
-                <tr class="category-header-row bg-slate-100 font-bold uppercase border-y border-slate-200 cursor-pointer" onclick="toggleCategory('prod-group', this)">
+                <tr class="category-header-row bg-slate-100 font-bold  border-y border-slate-200 cursor-pointer" onclick="toggleCategory('prod-group', this)">
                     <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">
                         PRODUCE COST <i class="fas fa-chevron-down collapse-icon ml-2"></i>
                     </td>
@@ -880,54 +907,78 @@
                 </tr>
                 <tr class="prod-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Romaine Hearts', 'PRODUCE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>440122</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">440122</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Romaine Hearts</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$32.50</td><td class="px-4 py-2 text-right">5.0 | $162.5</td><td class="px-4 py-2 text-right">2.0 | $65.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">4.2 | $136.5</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">2.80</span><span class="val-sub">0.45% | $91.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">2.50</span><span class="val-sub">0.40% | $81.2</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.30</span><span class="val-sub text-rose-500">-0.05% | $-9.8</span></div></td><td class="px-4 py-2 text-right">0.2 | $6.5</td><td class="px-4 py-2 text-center"><span class="doh-badge doh-low">2.4</span></td>
                 </tr>
                 <tr class="prod-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Yellow Onions', 'PRODUCE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>440125</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">440125</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Yellow Onions</td>
                     <td class="px-4 py-2 text-center">lb</td><td class="px-4 py-2 text-right font-mono">$0.85</td><td class="px-4 py-2 text-right">50.0 | $42.5</td><td class="px-4 py-2 text-right">50.0 | $42.5</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">45.0 | $38.2</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">55.00</span><span class="val-sub">0.12% | $46.8</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">52.00</span><span class="val-sub">0.11% | $44.2</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-3.00</span><span class="val-sub text-rose-500">-0.01% | $-2.6</span></div></td><td class="px-4 py-2 text-right">1.0 | $0.8</td><td class="px-4 py-2 text-center"><span class="doh-badge">8.2</span></td>
                 </tr>
                 <tr class="prod-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Red Tomatoes', 'PRODUCE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>440128</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">440128</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Red Tomatoes</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$18.20</td><td class="px-4 py-2 text-right">4.0 | $72.8</td><td class="px-4 py-2 text-right">4.0 | $72.8</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">3.8 | $69.2</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">4.20</span><span class="val-sub">0.25% | $76.4</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">4.30</span><span class="val-sub">0.26% | $78.2</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">0.10</span><span class="val-sub text-emerald-500">0.01% | $1.8</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">3.1</span></td>
                 </tr>
                 <tr class="prod-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Green Peppers', 'PRODUCE COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>440130</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">440130</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Green Peppers</td>
                     <td class="px-4 py-2 text-center">lb</td><td class="px-4 py-2 text-right font-mono">$1.45</td><td class="px-4 py-2 text-right">15.0 | $21.75</td><td class="px-4 py-2 text-right">10.0 | $14.50</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">12.0 | $17.40</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">13.00</span><span class="val-sub">0.05% | $18.85</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">12.50</span><span class="val-sub">0.04% | $18.13</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.50</span><span class="val-sub text-rose-500">-0.01% | $-0.72</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">6.5</span></td>
                 </tr>
 
-                <tr class="category-header-row bg-slate-100 font-bold uppercase border-y border-slate-200 cursor-pointer" onclick="toggleCategory('dairy-group', this)">
+                <tr class="category-header-row bg-slate-100 font-bold  border-y border-slate-200 cursor-pointer" onclick="toggleCategory('dairy-group', this)">
                     <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">
                         DAIRY COST <i class="fas fa-chevron-down collapse-icon ml-2"></i>
                     </td>
@@ -945,54 +996,78 @@
                 </tr>
                 <tr class="dairy-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Whole Milk 1G', 'DAIRY COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>330911</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">330911</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Whole Milk 1G</td>
                     <td class="px-4 py-2 text-center">ea</td><td class="px-4 py-2 text-right font-mono">$4.25</td><td class="px-4 py-2 text-right">12.0 | $51.0</td><td class="px-4 py-2 text-right">24.0 | $102.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">10.0 | $42.5</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">26.00</span><span class="val-sub">0.15% | $110.5</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">25.00</span><span class="val-sub">0.14% | $106.2</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-1.00</span><span class="val-sub text-rose-500">-0.01% | $-4.3</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">5.1</span></td>
                 </tr>
                 <tr class="dairy-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Salted Butter', 'DAIRY COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>330915</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">330915</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Salted Butter</td>
                     <td class="px-4 py-2 text-center">lb</td><td class="px-4 py-2 text-right font-mono">$3.10</td><td class="px-4 py-2 text-right">20.0 | $62.0</td><td class="px-4 py-2 text-right">10.0 | $31.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">18.0 | $55.8</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">12.00</span><span class="val-sub">0.05% | $37.2</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">11.50</span><span class="val-sub">0.05% | $35.6</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.50</span><span class="val-sub text-rose-500">-0.01% | $-1.6</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">9.4</span></td>
                 </tr>
                 <tr class="dairy-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Heavy Cream', 'DAIRY COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>330920</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">330920</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Heavy Cream</td>
                     <td class="px-4 py-2 text-center">qt</td><td class="px-4 py-2 text-right font-mono">$5.40</td><td class="px-4 py-2 text-right">24.0 | $129.6</td><td class="px-4 py-2 text-right">12.0 | $64.8</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">20.0 | $108.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">16.00</span><span class="val-sub">0.12% | $86.4</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">16.00</span><span class="val-sub">0.12% | $86.4</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">0.00</span><span class="val-sub text-emerald-500">0.00% | $0.0</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">6.8</span></td>
                 </tr>
                 <tr class="dairy-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Cheddar Cheese', 'DAIRY COST')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>330925</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">330925</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Cheddar Cheese</td>
                     <td class="px-4 py-2 text-center">lb</td><td class="px-4 py-2 text-right font-mono">$3.80</td><td class="px-4 py-2 text-right">30.0 | $114.0</td><td class="px-4 py-2 text-right">15.0 | $57.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">28.0 | $106.4</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">17.00</span><span class="val-sub">0.08% | $64.60</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">16.50</span><span class="val-sub">0.07% | $62.70</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.50</span><span class="val-sub text-rose-500">-0.01% | $-1.90</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">11.2</span></td>
                 </tr>
 
-                <tr class="category-header-row bg-slate-100 font-bold uppercase border-y border-slate-200 cursor-pointer" onclick="toggleCategory('paper-group', this)">
+                <tr class="category-header-row bg-slate-100 font-bold  border-y border-slate-200 cursor-pointer" onclick="toggleCategory('paper-group', this)">
                     <td class="sticky left-0 z-20 bg-slate-100 px-4 py-2 border-r border-slate-200" colspan="2">
                         PAPER & PACKAGING <i class="fas fa-chevron-down collapse-icon ml-2"></i>
                     </td>
@@ -1010,49 +1085,73 @@
                 </tr>
                 <tr class="paper-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('To-Go Containers', 'PAPER & PACKAGING')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>990112</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">990112</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">To-Go Containers</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$45.00</td><td class="px-4 py-2 text-right">10.0 | $450.0</td><td class="px-4 py-2 text-right">5.0 | $225.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">12.0 | $540.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">3.00</span><span class="val-sub">0.33% | $135.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">2.80</span><span class="val-sub">0.31% | $126.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.20</span><span class="val-sub text-rose-500">-0.02% | $-9.0</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">14.2</span></td>
                 </tr>
                 <tr class="paper-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Napkins 10k ct', 'PAPER & PACKAGING')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>990115</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">990115</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Napkins 10k ct</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$55.00</td><td class="px-4 py-2 text-right">5.0 | $275.0</td><td class="px-4 py-2 text-right">2.0 | $110.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">6.0 | $330.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">1.00</span><span class="val-sub">0.14% | $55.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">0.90</span><span class="val-sub">0.12% | $49.5</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.10</span><span class="val-sub text-rose-500">-0.02% | $-5.5</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">28.1</span></td>
                 </tr>
                 <tr class="paper-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Plastic Forks', 'PAPER & PACKAGING')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>990120</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">990120</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Plastic Forks</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$38.00</td><td class="px-4 py-2 text-right">8.0 | $304.0</td><td class="px-4 py-2 text-right">4.0 | $152.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">10.5 | $399.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">1.50</span><span class="val-sub">0.14% | $57.0</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">1.60</span><span class="val-sub">0.15% | $60.8</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-emerald-500">0.10</span><span class="val-sub text-emerald-500">0.01% | $3.8</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">42.2</span></td>
                 </tr>
                 <tr class="paper-group hover:bg-blue-50/50 border-b border-slate-100">
                     <td class="sticky left-0 z-20 bg-white px-4 py-2 border-r whitespace-nowrap">
-                        <div class="flex items-center space-x-2">
-                            <div onclick="openDiagnostic('Paper Plates', 'PAPER & PACKAGING')" class="w-7 h-7 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-box-open text-gray-500 text-[10px]"></i>
-                            </div>
-                            <span>990125</span>
-                        </div>
-                    </td>
+    <div onclick="openDiagnostic('2L Bottle Coke', 'BEVERAGE COST')" 
+         class="flex items-center space-x-3 cursor-pointer group/diag">
+        
+        <div class="w-7 h-7 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center group-hover/diag:bg-blue-600 group-hover/diag:border-blue-700 transition-all shadow-sm">
+            <i class="fas fa-microscope text-gray-400 group-hover/diag:text-white text-[10px]"></i>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-700 group-hover/diag:text-blue-600 transition-colors">990125</span>
+            
+        </div>
+    </div>
+</td>
                     <td class="sticky left-[80px] z-20 bg-white px-4 py-2 font-bold border-r whitespace-nowrap text-slate-800">Paper Plates</td>
                     <td class="px-4 py-2 text-center">cs</td><td class="px-4 py-2 text-right font-mono">$22.00</td><td class="px-4 py-2 text-right">15.0 | $330.0</td><td class="px-4 py-2 text-right">5.0 | $110.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-right">16.0 | $352.0</td><td class="px-4 py-2 text-right bg-blue-50/10"><div class="val-container"><span class="val-main">4.00</span><span class="val-sub">0.06% | $88.00</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main">3.90</span><span class="val-sub">0.05% | $85.80</span></div></td><td class="px-4 py-2 text-right"><div class="val-container"><span class="val-main text-rose-500">-0.10</span><span class="val-sub text-rose-500">-0.01% | $-2.20</span></div></td><td class="px-4 py-2 text-right">0.0 | $0.0</td><td class="px-4 py-2 text-center"><span class="doh-badge">38.4</span></td>
                 </tr>
@@ -1069,7 +1168,7 @@
                 <div class="w-2 h-10 bg-blue-600 rounded-full"></div>
                 <div>
                    
-                    <div class="text-sm font-black text-slate-800 mt-1 uppercase">Grand Total Rollup</div>
+                    <div class="text-sm font-black text-slate-800 mt-1 ">Grand Total Rollup</div>
                 </div>
             </div>
         </div>
