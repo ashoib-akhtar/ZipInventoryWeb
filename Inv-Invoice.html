@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	
     <style>
         body {
             font-family: 'Noto Sans', sans-serif;
@@ -50,11 +53,11 @@
 
         /* Table Styling */
         .invoice-table th {
-            font-size: 11px;
+            font-size: 14px;
             text-transform: ;
             letter-spacing: 0.025em;
             color: #64748b;
-            font-weight: 700;
+            font-weight: 600;
             border-bottom: 1px solid #e2e8f0;
             padding: 10px 16px;
             text-align: left;
@@ -62,7 +65,7 @@
             background: white;
         }
         .invoice-table td {
-            font-size: 12px;
+            font-size: 13px;
             padding: 10px 16px;
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
@@ -288,73 +291,71 @@
         </div>
     </div>
 
-    <div class="px-6 py-4 grid grid-cols-4 gap-4 bg-slate-50/50 flex-shrink-0">
-        <div id="kpi-all" onclick="handleKPIClick('all', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-blue-500 cursor-pointer transition-all flex items-center space-x-4">
-            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i>
-            </div>
-            <div>
-                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Total Spend</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-lg font-black text-slate-800 leading-none">$38,175.65</p>
-                    <span class="text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded leading-none">+12%</span>
-                </div>
-            </div>
+ <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-50/50 flex-shrink-0">
+    <div onclick="handleKPIClick('all', this)" class="kpi-card bg-blue-50/50 p-4 rounded-xl shadow-sm border-2 border-blue-500 cursor-pointer flex items-center space-x-4">
+        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
         </div>
-
-        <div id="kpi-finalized" onclick="handleKPIClick('Finalized', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-emerald-200 cursor-pointer transition-all flex items-center space-x-4">
-            <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
-            </div>
-            <div>
-                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Finalized</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-lg font-black text-slate-800 leading-none">142</p>
-                    <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded leading-none">92%</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="kpi-warning" onclick="handleKPIClick('Warning', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-rose-200 cursor-pointer transition-all flex items-center space-x-4">
-            <div class="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
-            </div>
-            <div>
-                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Warnings</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-lg font-black text-slate-800 leading-none">32</p>
-                    
-                </div>
-            </div>
-        </div>
-
-        <div id="kpi-credit" onclick="handleKPIClick('Credit', this)" class="kpi-card bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-200 cursor-pointer transition-all flex items-center space-x-4">
-            <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="file-text" class="w-5 h-5 text-amber-500"></i>
-            </div>
-            <div>
-                <p class="text-[14px] font-bold text-slate-600  tracking-wider leading-none mb-1">Credit $</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-lg font-black text-slate-800 leading-none">$351.50</p>
-                    
-                </div>
-            </div>
+        <div>
+            <p class="text-[14px] font-bold text-blue-900 leading-none mb-1">Total Spend</p>
+            <p class="text-lg font-black text-blue-950 leading-none">$38,175.65</p>
         </div>
     </div>
+
+    <div onclick="handleKPIClick('Unfinalized', this)" class="kpi-card bg-indigo-50/50 p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-indigo-500 cursor-pointer flex items-center space-x-4">
+        <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i data-lucide="clock" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+            <p class="text-[14px] font-bold text-indigo-900 leading-none mb-1">Unfinalized</p>
+            <p class="text-lg font-black text-indigo-950 leading-none">0</p>
+        </div>
+    </div>
+
+    <div onclick="handleKPIClick('Warning', this)" class="kpi-card bg-rose-50/50 p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-rose-500 cursor-pointer flex items-center space-x-4">
+        <div class="w-10 h-10 bg-rose-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+            <p class="text-[14px] font-bold text-rose-900 leading-none mb-1">Warnings</p>
+            <p class="text-lg font-black text-rose-950 leading-none">32</p>
+        </div>
+    </div>
+
+    <div onclick="handleKPIClick('Credit', this)" class="kpi-card bg-amber-50/50 p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-500 cursor-pointer flex items-center space-x-4">
+        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+            <p class="text-[14px] font-bold text-amber-900 leading-none mb-1">Credit $</p>
+            <p class="text-lg font-black text-amber-950 leading-none">$351.50</p>
+        </div>
+    </div>
+
+    <div onclick="openDeliveryInsights()" class="kpi-card bg-emerald-50/50 p-4 rounded-xl shadow-sm border-2 border-emerald-500 border-dashed cursor-pointer flex items-center space-x-4">
+        <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i data-lucide="presentation" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+            <p class="text-[14px] font-bold text-emerald-900 leading-none mb-1">Insights</p>
+            <p class="text-[10px] font-black text-emerald-600 uppercase">Analysis →</p>
+        </div>
+    </div>
+</div>
     
     <div class="flex-1 overflow-auto bg-white custom-scrollbar border-t border-slate-100">
         <table class="w-full invoice-table border-collapse">
             <thead class="sticky top-0 bg-white z-10 shadow-sm">
                 <tr class="text-left">
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Invoice No.</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Supplier Name</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Received On</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Finalized On</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Delivery Date</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Credit Amount</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Total Amount</th>
-                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-center">Action(s)</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Invoice No.</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Supplier Name</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Received On</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Finalized On</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Delivery Date</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-right">Credit Amount</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-right">Total Amount</th>
+                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-center">Action(s)</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100" id="invoiceListBody">
@@ -741,6 +742,130 @@ function toggleFlag(event) {
     
     rows.forEach(r => tbody.appendChild(r));
 }
+
+function openDeliveryInsights() {
+    const modal = document.getElementById('insightsModal');
+    modal.classList.remove('hidden');
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+
+    setTimeout(() => {
+        const ctxS = document.getElementById('supplierChart').getContext('2d');
+        const ctxC = document.getElementById('categoryChart').getContext('2d');
+
+        if (window.myChartS) window.myChartS.destroy();
+        if (window.myChartC) window.myChartC.destroy();
+
+        // Supplier Chart - Dollar Amount Focus
+        window.myChartS = new Chart(ctxS, {
+            type: 'doughnut',
+            data: {
+                labels: ['GFS', 'PEPSI', 'Others'],
+                datasets: [{
+                    data: [28500, 8500, 1175], 
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981'],
+                    hoverOffset: 15,
+                    borderWidth: 0
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                layout: { padding: 0 }, // Extra padding remove ki
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 10, font: { size: 10, weight: '600' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ` Spend: $${context.raw.toLocaleString()}`
+                        }
+                    }
+                },
+                cutout: '75%'
+            }
+        });
+
+        // Category Chart - Compact Bar
+        window.myChartC = new Chart(ctxC, {
+            type: 'bar',
+            data: {
+                labels: ['Bev', 'Meat', 'Dairy', 'Prod'],
+                datasets: [{
+                    label: 'Spend $',
+                    data: [5000, 8500, 3200, 4100],
+                    backgroundColor: '#6366f1',
+                    borderRadius: 6
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ` $${context.raw.toLocaleString()}`
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { font: { size: 9 }, callback: (v) => '$' + v }
+                    },
+                    x: { ticks: { font: { size: 9 } } }
+                }
+            }
+        });
+    }, 200);
+}
+
+function closeInsights() {
+    const modal = document.getElementById('insightsModal');
+    modal.classList.add('hidden'); // Modal hide karne ke liye
+    
+    // Optional: Memory clean karne ke liye charts destroy karna
+    if (window.myChartS) window.myChartS.destroy();
+    if (window.myChartC) window.myChartC.destroy();
+}
     </script>
+	
+	<div id="insightsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-300">
+        
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i> Delivery Insights
+            </h2>
+            <button onclick="closeInsights()" class="p-1.5 hover:bg-slate-200 rounded-full transition-colors">
+                <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
+            </button>
+        </div>
+
+        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <h3 class="text-[14px] font-black text-slate-600  mb-2">Supplier Spend ($)</h3>
+                <div class="h-[300px] w-full"> <canvas id="supplierChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <h3 class="text-[14px] font-black text-slate-600  mb-2">Category Spend ($)</h3>
+                <div class="h-[300px] w-full"> <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 border-t border-slate-100 bg-slate-50/50 text-center">
+            <button onclick="closeInsights()" class="px-6 py-2 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-900 transition-all shadow-lg shadow-slate-200">
+                Close Analysis
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
