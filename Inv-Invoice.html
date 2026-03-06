@@ -130,6 +130,52 @@
 }
 .row-flagged { background-color: #fff1f2 !important; border-left: 4px solid #f43f5e !important; }
 .flag-active { color: #f43f5e !important; fill: #f43f5e; }
+
+.table-main-wrapper {
+        padding: 0 24px 24px 24px; /* Left, Right aur Bottom se space */
+        height: calc(100vh - 200px); /* Adjust based on your header */
+        overflow-y: auto;
+    }
+
+    .table-container {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .invoice-table th {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0; /* Vertical Line */
+        padding: 12px 16px;
+        text-align: left;
+        background: #f8fafc;
+    }
+
+    .invoice-table td {
+        font-size: 13px;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        border-right: 1px solid #f1f5f9; /* Vertical Line */
+        color: #334155;
+    }
+
+    /* Last column ki vertical line hatane ke liye */
+    .invoice-table th:last-child, 
+    .invoice-table td:last-child {
+        border-right: none;
+    }
+
+    .data-row:hover { background-color: #f8fafc; }
     </style>
 </head>
 <body class="flex">
@@ -274,6 +320,7 @@
                             <div class="space-y-2 pt-1">
                                 <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
                                 <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Finalized</span></label>
+								<label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Unfinalized</span></label>
                             </div>
                         </div>
                     </div>
@@ -343,24 +390,28 @@
     </div>
 </div>
     
-    <div class="flex-1 overflow-auto bg-white custom-scrollbar border-t border-slate-100">
-        <table class="w-full invoice-table border-collapse">
-            <thead class="sticky top-0 bg-white z-10 shadow-sm">
-                <tr class="text-left">
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Invoice No.</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Supplier Name</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Received On</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Finalized On</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider">Delivery Date</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-right">Credit Amount</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-right">Total Amount</th>
-                    <th class="px-6 py-3 text-[14px] font-bold text-slate-600  tracking-wider text-center">Action(s)</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100" id="invoiceListBody">
-                </tbody>
-        </table>
+<div class="p-6 bg-[#f8fafc] h-[calc(100vh-180px)]"> 
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
+        
+        <div class="overflow-auto custom-scrollbar flex-1">
+            <table class="w-full border-separate border-spacing-0 min-w-[1200px]"> 
+                <thead class="sticky top-0 bg-slate-50 z-20 shadow-sm">
+                    <tr class="text-left">
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Status</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Invoice No.</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Supplier Name</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Received On</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Finalized On</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Delivery Date</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 text-right whitespace-nowrap">Credit Amount</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 text-right whitespace-nowrap">Total Amount</th>
+                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-b border-slate-200 text-center whitespace-nowrap">Action(s)</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceListBody">
+                    </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -839,7 +890,7 @@ function closeInsights() {
         
         <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i> Delivery Insights
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i> Delivery Insights (01/10/2026 - 02/09/2026)
             </h2>
             <button onclick="closeInsights()" class="p-1.5 hover:bg-slate-200 rounded-full transition-colors">
                 <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
