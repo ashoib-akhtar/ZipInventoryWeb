@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-	
     <style>
         body {
             font-family: 'Noto Sans', sans-serif;
@@ -53,11 +52,11 @@
 
         /* Table Styling */
         .invoice-table th {
-            font-size: 14px;
+            font-size: 11px;
             text-transform: ;
             letter-spacing: 0.025em;
             color: #64748b;
-            font-weight: 600;
+            font-weight: 700;
             border-bottom: 1px solid #e2e8f0;
             padding: 10px 16px;
             text-align: left;
@@ -65,7 +64,7 @@
             background: white;
         }
         .invoice-table td {
-            font-size: 13px;
+            font-size: 12px;
             padding: 10px 16px;
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
@@ -130,52 +129,6 @@
 }
 .row-flagged { background-color: #fff1f2 !important; border-left: 4px solid #f43f5e !important; }
 .flag-active { color: #f43f5e !important; fill: #f43f5e; }
-
-.table-main-wrapper {
-        padding: 0 24px 24px 24px; /* Left, Right aur Bottom se space */
-        height: calc(100vh - 200px); /* Adjust based on your header */
-        overflow-y: auto;
-    }
-
-    .table-container {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .invoice-table th {
-        font-size: 14px;
-        color: #64748b;
-        font-weight: 600;
-        border-bottom: 2px solid #e2e8f0;
-        border-right: 1px solid #e2e8f0; /* Vertical Line */
-        padding: 12px 16px;
-        text-align: left;
-        background: #f8fafc;
-    }
-
-    .invoice-table td {
-        font-size: 13px;
-        padding: 12px 16px;
-        border-bottom: 1px solid #f1f5f9;
-        border-right: 1px solid #f1f5f9; /* Vertical Line */
-        color: #334155;
-    }
-
-    /* Last column ki vertical line hatane ke liye */
-    .invoice-table th:last-child, 
-    .invoice-table td:last-child {
-        border-right: none;
-    }
-
-    .data-row:hover { background-color: #f8fafc; }
     </style>
 </head>
 <body class="flex">
@@ -320,7 +273,6 @@
                             <div class="space-y-2 pt-1">
                                 <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="All" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">All</span></label>
                                 <label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Finalized</span></label>
-								<label class="flex items-center space-x-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox status-filter" value="Finalized" checked><span class="text-[12px] font-semibold text-slate-600 group-hover:text-blue-600">Unfinalized</span></label>
                             </div>
                         </div>
                     </div>
@@ -338,7 +290,7 @@
         </div>
     </div>
 
- <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-50/50 flex-shrink-0">
+    <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-50/50 flex-shrink-0">
     <div onclick="handleKPIClick('all', this)" class="kpi-card bg-blue-50/50 p-4 rounded-xl shadow-sm border-2 border-blue-500 cursor-pointer flex items-center space-x-4">
         <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
@@ -390,28 +342,24 @@
     </div>
 </div>
     
-<div class="p-6 bg-[#f8fafc] h-[calc(100vh-180px)]"> 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
-        
-        <div class="overflow-auto custom-scrollbar flex-1">
-            <table class="w-full border-separate border-spacing-0 min-w-[1200px]"> 
-                <thead class="sticky top-0 bg-slate-50 z-20 shadow-sm">
-                    <tr class="text-left">
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Status</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Invoice No.</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Supplier Name</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Received On</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Finalized On</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 whitespace-nowrap">Delivery Date</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 text-right whitespace-nowrap">Credit Amount</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-r border-b border-slate-200 text-right whitespace-nowrap">Total Amount</th>
-                        <th class="px-6 py-4 text-[13px] font-bold text-slate-600 border-b border-slate-200 text-center whitespace-nowrap">Action(s)</th>
-                    </tr>
-                </thead>
-                <tbody id="invoiceListBody">
-                    </tbody>
-            </table>
-        </div>
+    <div class="flex-1 overflow-auto bg-white custom-scrollbar border-t border-slate-100">
+        <table class="w-full invoice-table border-collapse">
+            <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                <tr class="text-left">
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Invoice No.</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Supplier Name</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Received On</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Finalized On</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider">Delivery Date</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Credit Amount</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-right">Total Amount</th>
+                    <th class="px-6 py-3 text-[11px] font-bold text-slate-600  tracking-wider text-center">Action(s)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100" id="invoiceListBody">
+                </tbody>
+        </table>
     </div>
 </div>
 
@@ -794,6 +742,7 @@ function toggleFlag(event) {
     rows.forEach(r => tbody.appendChild(r));
 }
 
+
 function openDeliveryInsights() {
     const modal = document.getElementById('insightsModal');
     modal.classList.remove('hidden');
@@ -884,6 +833,7 @@ function closeInsights() {
     if (window.myChartC) window.myChartC.destroy();
 }
     </script>
+	
 	
 	<div id="insightsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in duration-300">
